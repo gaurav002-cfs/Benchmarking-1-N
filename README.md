@@ -6,6 +6,8 @@ Open-weight face-embedding models compared on a **1:N identification** task (fin
 **Headline:** on VGGFace2 (8,000 enrolled people, 24,000 probes) the top group is **LVFace-B** (93.24%), **LVFace-S** (93.19%), **LVFace-L** (93.19%), **glintr100 (antelopev2)** (92.96%), **LVFace-T** (92.60%).
 `antelopev2`'s `glintr100` (the baseline) is already in the top tier; the best ByteDance LVFace models match or marginally beat it on top-1 and open-set, but not on verification EER.
 
+**Decision analysis** (top-K, cosine scores, confident-wrong rates, latency and product decisions): [product/ANALYSIS.md](product/ANALYSIS.md).
+
 ![ranking](results/figures/ranking_top1_top10.png)
 
 ## Key findings
