@@ -1,6 +1,6 @@
 # AdaFace IR50 MS1MV2 (CVLface)
 
-**Rank 10 of 21 by top-1 · Tier 3** · [back to the benchmark](../../README.md)
+**Rank 16 of 27 by top-1 · Tier 3** · [back to the benchmark](../../README.md)
 
 ## Overview
 | | |
@@ -35,6 +35,24 @@ Needs transformers==4.44.2, fvcore, omegaconf, einops. Run in its own process (C
 | Throughput during the run | 252 img/s | not comparable across models (different backends: CoreML / CPU / MPS) |
 
 Raw numbers: [`results.json`](results.json). Similarity scores have a different scale for each model, so thresholds do not transfer between models.
+
+## Cosine similarity profile
+Cosine similarity of the L2-normalised embeddings (match % = cosine x 100). It is **not a probability** and the scale is specific to this model.
+
+| Score group | median | 5th pct | 95th pct |
+|---|--:|--:|--:|
+| Same person (test photo vs its enrolled photo) | 0.520 | 0.108 | 0.732 |
+| Different people (random pairs) | 0.000 | -0.090 | 0.095 |
+| Stranger's best match in the gallery (never-enrolled photo) | 0.250 | 0.214 | 0.322 |
+
+Separation d' = **3.70** (higher = same-person and different-person scores are further apart).
+
+| Operating point | Cosine threshold |
+|---|--:|
+| 1:1 verification, false-accept rate 1% / 0.1% / 0.01% | 0.138 / 0.193 / 0.250 |
+| 1:N open-set, 1% / 5% / 10% of strangers accepted | 0.363 / 0.322 / 0.301 |
+
+![cosine distributions](cosine_distribution.png)
 
 ## Run it
 ```bash

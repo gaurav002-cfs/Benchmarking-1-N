@@ -1,0 +1,18 @@
+{
+ "dim": 768,
+ "img_per_s": 98,
+ "top1": 0.9125416666666667,
+ "top5": 0.9330416666666667,
+ "top10": 0.9370416666666667,
+ "genuine_sim_median": 0.5078296661376953,
+ "impostor_best_sim_median": 0.2327609658241272,
+ "found@unknown_accept_1%": 0.82075,
+ "thr@unknown_accept_1%": 0.35294732451438904,
+ "found@unknown_accept_5%": 0.8777083333333333,
+ "thr@unknown_accept_5%": 0.2975119352340698,
+ "TAR@FAR=0.001": 0.9346666666666666,
+ "TAR@FAR=0.0001": 0.9154583333333334,
+ "EER": 0.04281332398719392,
+ "training_data": "WebFace4M",
+ "license": "MIT (repo); trained on WebFace4M, whose dataset terms apply"
+}

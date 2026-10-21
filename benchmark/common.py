@@ -69,8 +69,8 @@ def onnx_arcface(path):
     return fn
 
 
-def torch_model(model, mean, std, size=None):
-    """PyTorch wrapper: RGB, (x/255-mean)/std, optional bilinear resize to size x size. Device: cuda > mps > cpu."""
+def torch_model(model, mean, std, size=None, rgb=True):
+    """PyTorch wrapper: RGB (BGR if rgb=False), (x/255-mean)/std, optional bilinear resize to size x size. Device: cuda > mps > cpu."""
     import torch
     dev = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     model = model.to(dev).eval()
@@ -79,7 +79,7 @@ def torch_model(model, mean, std, size=None):
     def fn(x):
         out = []
         for i in range(0, len(x), 128):
-            t = torch.from_numpy(np.ascontiguousarray(x[i:i + 128][..., ::-1])).to(dev).permute(0, 3, 1, 2).float() / 255
+            t = torch.from_numpy(np.ascontiguousarray(x[i:i + 128][..., ::-1] if rgb else x[i:i + 128])).to(dev).permute(0, 3, 1, 2).float() / 255
             t = (t - m) / sd
             if size: t = torch.nn.functional.interpolate(t, size=(size, size), mode="bilinear", align_corners=False)
             out.append(model(t.contiguous()).float().cpu().numpy())

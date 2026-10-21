@@ -1,6 +1,6 @@
 # ViT-Tiny/8 AdaFace (gaunernst)
 
-**Rank 14 of 21 by top-1 · Tier 3** · [back to the benchmark](../../README.md)
+**Rank 20 of 27 by top-1 · Tier 3** · [back to the benchmark](../../README.md)
 
 ## Overview
 | | |
@@ -34,6 +34,24 @@ Tiny ViT, ~5.5M params. Output is not normalised by the model: the harness L2-no
 | Throughput during the run | 859 img/s | not comparable across models (different backends: CoreML / CPU / MPS) |
 
 Raw numbers: [`results.json`](results.json). Similarity scores have a different scale for each model, so thresholds do not transfer between models.
+
+## Cosine similarity profile
+Cosine similarity of the L2-normalised embeddings (match % = cosine x 100). It is **not a probability** and the scale is specific to this model.
+
+| Score group | median | 5th pct | 95th pct |
+|---|--:|--:|--:|
+| Same person (test photo vs its enrolled photo) | 0.516 | 0.123 | 0.738 |
+| Different people (random pairs) | 0.000 | -0.126 | 0.129 |
+| Stranger's best match in the gallery (never-enrolled photo) | 0.325 | 0.280 | 0.400 |
+
+Separation d' = **3.50** (higher = same-person and different-person scores are further apart).
+
+| Operating point | Cosine threshold |
+|---|--:|
+| 1:1 verification, false-accept rate 1% / 0.1% / 0.01% | 0.186 / 0.255 / 0.323 |
+| 1:N open-set, 1% / 5% / 10% of strangers accepted | 0.451 / 0.400 / 0.382 |
+
+![cosine distributions](cosine_distribution.png)
 
 ## Run it
 ```bash

@@ -1,0 +1,18 @@
+{
+ "dim": 512,
+ "img_per_s": 55,
+ "top1": 0.9319166666666666,
+ "top5": 0.9355833333333333,
+ "top10": 0.9359583333333333,
+ "genuine_sim_median": 0.4710782766342163,
+ "impostor_best_sim_median": 0.23501181602478027,
+ "found@unknown_accept_1%": 0.9242083333333333,
+ "thr@unknown_accept_1%": 0.31476932764053345,
+ "found@unknown_accept_5%": 0.9288333333333333,
+ "thr@unknown_accept_5%": 0.2820509672164917,
+ "TAR@FAR=0.001": 0.9345,
+ "TAR@FAR=0.0001": 0.9326666666666666,
+ "EER": 0.05550868030059805,
+ "training_data": "Glint360K (same data as the antelopev2 baseline)",
+ "license": "model card + code: MIT. The licence file covers the code; weights / Glint360K terms NOT verified"
+}

@@ -287,7 +287,7 @@ def tier_of(s):
 order_m = sorted(allm, key=lambda s: -allm[s]["top1"])
 TFILL = {"Tier 1": GOOD, "Tier 2": PatternFill("solid", fgColor="E2F0D9"), "Tier 3": WARN, "Tier 4": BAD, "Not comparable": PatternFill("solid", fgColor="D9D9D9")}
 ws = wb.create_sheet("Model Benchmark", 1)
-title(ws, "Model benchmark: 21 open-weight models on the VGGFace2 8k 1:N protocol",
+title(ws, f"Model benchmark: {len(allm)} open-weight models on the VGGFace2 8k 1:N protocol",
       "8,000 enrolled people (1 photo each), 24,000 probes, 1,500 photos of 500 unknown people. Exact cosine search. Details: GitHub repo gaurav002-cfs/Benchmarking-1-N")
 cols_m = ["#", "Model", "Tier", "Top-1", "Top-5", "Top-10", "Found @1% unknown-accept", "Found @5% unknown-accept", "TAR @ FAR 0.1%", "TAR @ FAR 0.01%", "EER", "Embedding dim", "Params (M)", "Training data", "Licence (summary)", "Notes"]
 header(ws, 4, cols_m)
@@ -348,7 +348,28 @@ if hn.exists():
     for k, rw in enumerate(t.itertuples(index=False), r0 + 1):
         for j, v in enumerate(rw, 1): ws.cell(k, j, None if pd.isna(v) else v)
 widths(ws, [52, 14, 22, 16, 22, 26, 24, 12, 12, 12, 12])
-wb["Summary"]["A3"] = "21-model comparison: see sheets 'Model Benchmark', 'Pair Test' and 'Synthetic 100k'. The remaining sheets analyse the baseline model (glintr100) photo by photo."
+# ---- cosine scores sheet
+cs = pd.read_csv(REPO / "results/cosine_stats.csv").set_index("slug")
+ws = wb.create_sheet("Cosine Scores", 2)
+title(ws, "Cosine similarity scores per model (VGGFace2 8k protocol)", "Cosine of L2-normalised embeddings, range -1..1; match % = cosine x 100. NOT a probability and different for every model: a threshold does not transfer between models.")
+header(ws, 4, ["Model", "Median cosine: same person", "Same person p5", "Same person p95", "Median: different people", "Median: stranger's best match in gallery", "Separation d' (higher = better)",
+               "Cosine at FAR 1% (1:1)", "Cosine at FAR 0.1%", "Cosine at FAR 0.01%", "Cosine at 1% stranger-accept (1:N)", "Cosine at 5% stranger-accept"])
+for k, sl in enumerate(order_m, 5):
+    r = cs.loc[sl]
+    vals = [meta[sl]["name"], r.median_same_person, r.same_person_p5, r.same_person_p95, r.median_different_person, r.median_stranger_best_match, r.dprime,
+            r["cos_thr_FAR_1e-2"], r["cos_thr_FAR_1e-3"], r["cos_thr_FAR_1e-4"], r.cos_thr_stranger_accept_1pct, r.cos_thr_stranger_accept_5pct]
+    for j, v in enumerate(vals, 1):
+        c = ws.cell(k, j, v if j == 1 else float(v))
+        if j > 1: c.number_format = "0.000" if j != 7 else "0.00"
+b0 = 5 + len(order_m) + 1
+ws.cell(b0, 1, "How to read").font = Font(bold=True, size=12)
+for i, t in enumerate(["Same person: cosine between a test photo and the enrolled photo of the same person (24,000 pairs). Different people: random pairs (200 per probe). Stranger's best match: highest cosine of a never-enrolled person's photo against the whole gallery (1,500 photos).",
+                       "Separation d' = (mean same - mean different) / sqrt(average variance): how far apart the two score distributions are, independent of where a threshold is put. Highest = glintr100 (see table).",
+                       "'Cosine at FAR x' = the cosine a different-person pair exceeds only x of the time (1:1 verification threshold). 'Cosine at x% stranger-accept' = the 1:N threshold that lets only x% of strangers through.",
+                       "Because the scales differ (e.g. LVFace needs a lower threshold than glintr100 for the same error rate), always tune the threshold per model on your own data. Per-photo top-5 matches with match % for six models: results/photo_top5/*.csv in the repo."], b0 + 1):
+    ws.cell(i, 1, t)
+widths(ws, [44] + [16] * 11); ws.freeze_panes = "B5"; ws.row_dimensions[4].height = 60
+wb["Summary"]["A3"] = f"{len(allm)}-model comparison: see sheets 'Model Benchmark', 'Cosine Scores', 'Pair Test' and 'Synthetic 100k'. The remaining sheets analyse the baseline model (glintr100) photo by photo."
 wb["Summary"]["A3"].font = Font(italic=True, color="C00000")
 
 # ---------- 10. Method ----------
@@ -364,7 +385,7 @@ lines = ["PIPELINE: image -> (VGGFace2 images are pre-aligned 112x112, detection
          "HNSW recall tested only at 8,000 vectors on 3,000 probes. 25k/100k latency used random padding vectors; 1M is extrapolated.",
          "LICENCE: antelopev2 weights and VGGFace2 are for non-commercial research use - confirm before production use.",
          "ENVIRONMENT: 10-core Apple Silicon Mac, ONNX Runtime CPU, Qdrant in Colima; latency includes local HTTP round trip.",
-         "MODEL BENCHMARK: 21 models, same split and metrics; one random split (Tier 1 order not statistically reliable); possible training-data overlap with VGGFace2; FaceNet-VGGFace2 is leaked.",
+         f"MODEL BENCHMARK: {len(allm)} models, same split and metrics; one random split (Tier 1 order not statistically reliable); possible training-data overlap with VGGFace2; FaceNet-VGGFace2 is leaked.",
          "Full code, per-model pages and caveats: GitHub repo gaurav002-cfs/Benchmarking-1-N."]
 for k, t in enumerate(lines, 3):
     ws.cell(k, 1, t).alignment = wrap

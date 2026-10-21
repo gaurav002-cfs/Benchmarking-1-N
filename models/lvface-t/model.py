@@ -13,8 +13,7 @@ INFO = {'name': 'LVFace-T (Glint360K)',
  'license': 'model card + code: MIT. The licence file covers the code; weights / Glint360K terms NOT verified',
  'license_class': 'unknown',
  'pre': 'ONNX, RGB, (x/255-0.5)/0.5 = (x-127.5)/127.5, 112x112 (official inference_onnx.py)',
- 'notes': 'CoreML cannot run the ViT layers, so on Apple Silicon this runs on CPU (slow for -B). LVFace-L exists but was not run (about 3 '
-          'h on this CPU; card shows it ~= -B).',
+ 'notes': 'CoreML cannot run the ViT layers, so on Apple Silicon this runs on CPU (slow for -B). LVFace-L was run separately through the official PyTorch code on the GPU (see the lvface-l folder).',
  'params': 19.14,
  'weights_file_bytes': 76653813}
 URL = 'https://huggingface.co/bytedance-research/LVFace/resolve/main/LVFace-T_Glint360K/LVFace-T_Glint360K.onnx'

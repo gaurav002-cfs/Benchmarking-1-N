@@ -1,6 +1,6 @@
 # ArcFace IR101 WebFace4M (CVLface)
 
-**Rank 8 of 21 by top-1 · Tier 2** · [back to the benchmark](../../README.md)
+**Rank 11 of 27 by top-1 · Tier 2** · [back to the benchmark](../../README.md)
 
 ## Overview
 | | |
@@ -35,6 +35,24 @@ Needs transformers==4.44.2, fvcore, omegaconf, einops. Run in its own process (C
 | Throughput during the run | 145 img/s | not comparable across models (different backends: CoreML / CPU / MPS) |
 
 Raw numbers: [`results.json`](results.json). Similarity scores have a different scale for each model, so thresholds do not transfer between models.
+
+## Cosine similarity profile
+Cosine similarity of the L2-normalised embeddings (match % = cosine x 100). It is **not a probability** and the scale is specific to this model.
+
+| Score group | median | 5th pct | 95th pct |
+|---|--:|--:|--:|
+| Same person (test photo vs its enrolled photo) | 0.535 | 0.123 | 0.729 |
+| Different people (random pairs) | 0.002 | -0.085 | 0.092 |
+| Stranger's best match in the gallery (never-enrolled photo) | 0.247 | 0.206 | 0.314 |
+
+Separation d' = **3.95** (higher = same-person and different-person scores are further apart).
+
+| Operating point | Cosine threshold |
+|---|--:|
+| 1:1 verification, false-accept rate 1% / 0.1% / 0.01% | 0.134 / 0.189 / 0.247 |
+| 1:N open-set, 1% / 5% / 10% of strangers accepted | 0.359 / 0.314 / 0.294 |
+
+![cosine distributions](cosine_distribution.png)
 
 ## Run it
 ```bash

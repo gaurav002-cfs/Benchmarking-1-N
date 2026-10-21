@@ -1,0 +1,18 @@
+{
+ "dim": 512,
+ "img_per_s": 145,
+ "top1": 0.8999583333333333,
+ "top5": 0.92375,
+ "top10": 0.9299583333333333,
+ "genuine_sim_median": 0.6059473752975464,
+ "impostor_best_sim_median": 0.3248266875743866,
+ "found@unknown_accept_1%": 0.817625,
+ "thr@unknown_accept_1%": 0.441010057926178,
+ "found@unknown_accept_5%": 0.8567083333333333,
+ "thr@unknown_accept_5%": 0.40096256136894226,
+ "TAR@FAR=0.001": 0.9277916666666667,
+ "TAR@FAR=0.0001": 0.9072083333333333,
+ "EER": 0.043939705607607904,
+ "training_data": "MS1MV2",
+ "license": "Apache-2.0 (repo); trained on MS1MV2, whose dataset terms apply"
+}

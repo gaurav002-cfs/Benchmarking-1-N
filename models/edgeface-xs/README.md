@@ -1,6 +1,6 @@
 # EdgeFace-XS (g=0.6)
 
-**Rank 13 of 21 by top-1 · Tier 3** · [back to the benchmark](../../README.md)
+**Rank 19 of 27 by top-1 · Tier 3** · [back to the benchmark](../../README.md)
 
 ## Overview
 | | |
@@ -35,6 +35,24 @@ Edge-device family; 1.77M params and 154.00 MFLOPs per the model card. Code is f
 | Throughput during the run | 1626 img/s | not comparable across models (different backends: CoreML / CPU / MPS) |
 
 Raw numbers: [`results.json`](results.json). Similarity scores have a different scale for each model, so thresholds do not transfer between models.
+
+## Cosine similarity profile
+Cosine similarity of the L2-normalised embeddings (match % = cosine x 100). It is **not a probability** and the scale is specific to this model.
+
+| Score group | median | 5th pct | 95th pct |
+|---|--:|--:|--:|
+| Same person (test photo vs its enrolled photo) | 0.563 | 0.177 | 0.766 |
+| Different people (random pairs) | 0.006 | -0.155 | 0.168 |
+| Stranger's best match in the gallery (never-enrolled photo) | 0.383 | 0.335 | 0.453 |
+
+Separation d' = **3.74** (higher = same-person and different-person scores are further apart).
+
+| Operating point | Cosine threshold |
+|---|--:|
+| 1:1 verification, false-accept rate 1% / 0.1% / 0.01% | 0.236 / 0.315 / 0.379 |
+| 1:N open-set, 1% / 5% / 10% of strangers accepted | 0.516 / 0.453 / 0.435 |
+
+![cosine distributions](cosine_distribution.png)
 
 ## Run it
 ```bash

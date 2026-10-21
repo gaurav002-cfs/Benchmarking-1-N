@@ -143,7 +143,7 @@ for cls in LCOL:
     if not sel: continue
     f.add_bar(y=[meta[sl]["name"] for sl in sel], x=[allm[sl]["top1"] * 100 for sl in sel], orientation="h", name=LLAB[cls], marker_color=LCOL[cls],
               text=[f"{allm[sl]['top1'] * 100:.1f}%" for sl in sel], textposition="outside")
-layout(f, 760, "Top-1 accuracy of 21 models (VGGFace2 8k), coloured by licence class"); f.update_yaxes(autorange="reversed"); f.update_xaxes(range=[0, 100], title="% of probes with the right person first")
+layout(f, 900, f"Top-1 accuracy of {len(allm)} models (VGGFace2 8k), coloured by licence class"); f.update_yaxes(autorange="reversed"); f.update_xaxes(range=[0, 100], title="% of probes with the right person first")
 figs["models"] = f
 f = go.Figure()
 for cls in LCOL:
@@ -170,6 +170,19 @@ def div(fig):
     h = fig.to_html(full_html=False, include_plotlyjs="inline" if first[0] else False); first[0] = False; return h
 
 
+_cs = _pd.read_csv(REPO / "results/cosine_stats.csv").set_index("slug")
+_fc = go.Figure()
+_fc.add_bar(x=[meta[sl]["name"] for sl in ord_m], y=[_cs.loc[sl, "median_same_person"] for sl in ord_m], name="same person (median)", marker_color="#2e9e5b")
+_fc.add_bar(x=[meta[sl]["name"] for sl in ord_m], y=[_cs.loc[sl, "median_stranger_best_match"] for sl in ord_m], name="stranger's best match (median)", marker_color="#888888")
+_fc.add_bar(x=[meta[sl]["name"] for sl in ord_m], y=[_cs.loc[sl, "median_different_person"] for sl in ord_m], name="different people (median)", marker_color="#d9534f")
+layout(_fc, 560, "Cosine similarity scores by model (sorted by top-1): the scale is model-specific"); _fc.update_yaxes(title="cosine similarity (match % = x100)"); _fc.update_xaxes(tickangle=-60, tickfont_size=9)
+figs["cosine"] = _fc
+_ct = ("<table style='border-collapse:collapse;font-size:12px;width:100%'><tr style='background:#1F3864;color:#fff'>" + "".join(f"<th style='padding:5px;text-align:left'>{h}</th>" for h in ["Model", "same person (median)", "different people (median)", "stranger best match (median)", "separation d'", "cosine @ FAR 0.1%", "cosine @ 1% stranger-accept"]) + "</tr>")
+for sl in ord_m:
+    c = _cs.loc[sl]; _ct += f"<tr style='border-bottom:1px solid #ddd'><td style='padding:4px'>{meta[sl]['name']}</td><td>{c.median_same_person:.3f}</td><td>{c.median_different_person:.3f}</td><td>{c.median_stranger_best_match:.3f}</td><td>{c.dprime:.2f}</td><td>{c['cos_thr_FAR_1e-3']:.3f}</td><td>{c.cos_thr_stranger_accept_1pct:.3f}</td></tr>"
+_ct += "</table>"
+cos_html = ("<h3>Cosine similarity scores</h3><div class=note>Match % = cosine x 100. It is not a probability, and every model has its own scale, so thresholds do not transfer between models. "
+            "d' measures how well a model separates same-person from different-person scores (higher is better).</div><div class=box>" + div(figs["cosine"]) + _ct + "</div>")
 tun_html = ("<h3>Heavier HNSW build settings at 100k (synthetic)</h3><div class=box>" + div(figs["tuning"]) +
             "<p>Each line is one build configuration (m / ef_construct / segments). See the repo's experiments/hnsw_tuning.</p></div>") if "tuning" in figs else ""
 r_, tp = ex["right"], ex["sc"][:, 0]
@@ -204,10 +217,10 @@ Results below are on VGGFace2 (clean, pre-aligned) - the easy case; real Cashfre
 <h2>4. Latency and scale</h2>
 <div class=box>{div(figs['lat'])}<ul><li>Exact scan grows linearly (~0.066 ms per 1,000 vectors); HNSW stays almost flat.</li>
 <li>At 8k-100k vectors search is under 10 ms - embedding (~100 ms) dominates, so HNSW isn't needed for speed yet. 1M-vector behaviour was not measured.</li></ul></div>
-<h2>5. Model benchmark: 21 open-weight models</h2>
+<h2>5. Model benchmark: {len(allm)} open-weight models</h2>
 <div class=note>Same split and metrics for every model (8,000 enrolled people, 24,000 probes, 1,500 unknown-person photos, exact search). <b>Found@1%</b> = share of enrolled people identified when only 1% of strangers' photos are accepted;
 <b>TAR@0.1%</b> = 1:1 same-person pairs accepted when 0.1% of different-person pairs are wrongly accepted; <b>EER</b> lower is better. Licence classes are a reading of the model cards, not legal advice.</div>
-<div class=box>{div(figs['models'])}</div><div class=box>{div(figs['scatter'])}</div><div class=box>{models_table}</div>{tun_html}
+<div class=box>{div(figs['models'])}</div><div class=box>{div(figs['scatter'])}</div><div class=box>{models_table}</div>{cos_html}{tun_html}
 <h2>Caveats</h2><ul><li>Single random 8k gallery/seed; VGGFace2 is cleaner than real KYC photos; misses likely hard/mislabeled photos (not verified by eye).</li>
 <li>Latency values were measured earlier in this session (3,000-probe test), not in this run. Face detection (SCRFD) not timed - VGGFace2 is pre-aligned.</li>
 <li>HNSW recall at sizes above 8k was not measured. Weights and VGGFace2 are non-commercial research licensed.</li></ul>

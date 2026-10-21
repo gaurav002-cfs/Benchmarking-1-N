@@ -1,6 +1,6 @@
 # w600k_mbf (buffalo_s)
 
-**Rank 12 of 21 by top-1 · Tier 3** · [back to the benchmark](../../README.md)
+**Rank 18 of 27 by top-1 · Tier 3** · [back to the benchmark](../../README.md)
 
 ## Overview
 | | |
@@ -35,6 +35,24 @@ Small and fast. CoreML cannot run this model, the loader falls back to CPU autom
 | Throughput during the run | 174 img/s | not comparable across models (different backends: CoreML / CPU / MPS) |
 
 Raw numbers: [`results.json`](results.json). Similarity scores have a different scale for each model, so thresholds do not transfer between models.
+
+## Cosine similarity profile
+Cosine similarity of the L2-normalised embeddings (match % = cosine x 100). It is **not a probability** and the scale is specific to this model.
+
+| Score group | median | 5th pct | 95th pct |
+|---|--:|--:|--:|
+| Same person (test photo vs its enrolled photo) | 0.454 | 0.133 | 0.670 |
+| Different people (random pairs) | 0.005 | -0.099 | 0.113 |
+| Stranger's best match in the gallery (never-enrolled photo) | 0.278 | 0.238 | 0.344 |
+
+Separation d' = **3.57** (higher = same-person and different-person scores are further apart).
+
+| Operating point | Cosine threshold |
+|---|--:|
+| 1:1 verification, false-accept rate 1% / 0.1% / 0.01% | 0.163 / 0.225 / 0.282 |
+| 1:N open-set, 1% / 5% / 10% of strangers accepted | 0.382 / 0.344 / 0.327 |
+
+![cosine distributions](cosine_distribution.png)
 
 ## Run it
 ```bash
