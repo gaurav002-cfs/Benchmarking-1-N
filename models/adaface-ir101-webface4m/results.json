@@ -1,0 +1,18 @@
+{
+ "dim": 512,
+ "img_per_s": 137,
+ "top1": 0.9155833333333333,
+ "top5": 0.9327916666666667,
+ "top10": 0.9367083333333334,
+ "genuine_sim_median": 0.5618774890899658,
+ "impostor_best_sim_median": 0.270380437374115,
+ "found@unknown_accept_1%": 0.8584583333333333,
+ "thr@unknown_accept_1%": 0.37825194001197815,
+ "found@unknown_accept_5%": 0.8865416666666667,
+ "thr@unknown_accept_5%": 0.3402738571166992,
+ "TAR@FAR=0.001": 0.935625,
+ "TAR@FAR=0.0001": 0.919625,
+ "EER": 0.040646443957096275,
+ "training_data": "WebFace4M",
+ "license": "card: follow training-data licence"
+}

@@ -1,0 +1,18 @@
+{
+ "dim": 128,
+ "img_per_s": 153,
+ "top1": 0.7724166666666666,
+ "top5": 0.84875,
+ "top10": 0.8700416666666667,
+ "genuine_sim_median": 0.5481162071228027,
+ "impostor_best_sim_median": 0.4286451041698456,
+ "found@unknown_accept_1%": 0.5594583333333333,
+ "thr@unknown_accept_1%": 0.5267624855041504,
+ "found@unknown_accept_5%": 0.6440833333333333,
+ "thr@unknown_accept_5%": 0.49272531270980835,
+ "TAR@FAR=0.001": 0.857625,
+ "TAR@FAR=0.0001": 0.7769166666666667,
+ "EER": 0.05134832907437549,
+ "training_data": "see SFace paper",
+ "license": "Apache-2.0 (repo LICENSE)"
+}

@@ -1,0 +1,18 @@
+{
+ "dim": 768,
+ "img_per_s": 14,
+ "top1": 0.27045833333333336,
+ "top5": 0.4101666666666667,
+ "top10": 0.4735416666666667,
+ "genuine_sim_median": 0.7715756893157959,
+ "impostor_best_sim_median": 0.8164629936218262,
+ "found@unknown_accept_1%": 0.011875,
+ "thr@unknown_accept_1%": 0.9145656824111938,
+ "found@unknown_accept_5%": 0.035666666666666666,
+ "thr@unknown_accept_5%": 0.8904450535774231,
+ "TAR@FAR=0.001": 0.222625,
+ "TAR@FAR=0.0001": 0.07879166666666666,
+ "EER": 0.11787686347935866,
+ "training_data": "WebImageText (general, not face-specific)",
+ "license": "MIT (OpenAI CLIP)"
+}

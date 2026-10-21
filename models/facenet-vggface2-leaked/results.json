@@ -1,0 +1,18 @@
+{
+ "dim": 512,
+ "img_per_s": 523,
+ "top1": 0.6596666666666666,
+ "top5": 0.7982916666666666,
+ "top10": 0.841875,
+ "genuine_sim_median": 0.6701259613037109,
+ "impostor_best_sim_median": 0.5948492288589478,
+ "found@unknown_accept_1%": 0.30845833333333333,
+ "thr@unknown_accept_1%": 0.7378085255622864,
+ "found@unknown_accept_5%": 0.444125,
+ "thr@unknown_accept_5%": 0.6893330216407776,
+ "TAR@FAR=0.001": 0.8272916666666666,
+ "TAR@FAR=0.0001": 0.6535,
+ "EER": 0.0347819065131413,
+ "training_data": "VGGFace2 = SAME DATA AS THIS TEST (leaked, not a fair score)",
+ "license": "MIT code; weights: timesler/facenet-pytorch"
+}

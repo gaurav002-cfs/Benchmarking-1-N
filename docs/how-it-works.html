@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Face Match Works - A Visual Guide</title>
+<style>
+:root{--ink:#1b2437;--mut:#5b6678;--bg:#f4f6fb;--card:#fff;--brand:#3b5bdb;--brand2:#7048e8;--ok:#2f9e44;--bad:#e03131;--warn:#f08c00;--line:#e3e8f2;--l0:#9aa5b8;--l1:#3b5bdb;--l2:#7048e8;--l3:#e03131}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.65}
+.hero{background:linear-gradient(135deg,#2b3a8f 0%,#5b3fd0 55%,#8a4fe0 100%);color:#fff;padding:64px 24px 80px;text-align:center}
+.hero h1{font-size:clamp(30px,5vw,50px);margin:0 0 10px;letter-spacing:-.5px}
+.hero p{max-width:760px;margin:0 auto;font-size:18px;opacity:.92}
+.chips{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.chip{background:#ffffff26;border:1px solid #ffffff44;border-radius:999px;padding:6px 14px;font-size:13px}
+nav{position:sticky;top:0;z-index:20;background:#ffffffee;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;text-align:center}
+nav a{display:inline-block;padding:12px 14px;color:var(--mut);text-decoration:none;font-size:14px;font-weight:600}
+nav a:hover{color:var(--brand)}
+main{max-width:1020px;margin:0 auto;padding:10px 20px 80px}
+section{margin-top:54px}
+h2{font-size:28px;margin:0 0 6px;display:flex;align-items:center;gap:12px}
+h2 .n{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:10px;width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;font-size:18px}
+.lead{color:var(--mut);font-size:17px;margin:0 0 18px}
+h3{margin:26px 0 6px;font-size:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;box-shadow:0 2px 10px #1b24370a;margin:16px 0}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.callout{border-left:5px solid var(--brand);background:#eef2ff;padding:14px 18px;border-radius:10px;margin:16px 0}
+.callout.warn{border-color:var(--warn);background:#fff6e5}.callout.ok{border-color:var(--ok);background:#ebf8ee}.callout.bad{border-color:var(--bad);background:#fdecec}
+.callout b.t{display:block;margin-bottom:2px}
+code{background:#eef1f8;border-radius:6px;padding:2px 7px;font-size:.92em;color:#3b2d9c}
+.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:18px 0}
+.step{flex:1 1 118px;min-width:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;position:relative;box-shadow:0 2px 8px #1b24370a}
+.step .no{position:absolute;top:-12px;left:12px;background:var(--brand);color:#fff;border-radius:999px;width:26px;height:26px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.step h4{margin:6px 0 4px;font-size:15px}.step p{margin:0;font-size:13.5px;color:var(--mut)}
+.arrow{align-self:center;color:var(--brand);font-size:18px;flex:0 0 auto}
+table{width:100%;border-collapse:collapse;font-size:14.5px;background:#fff;border-radius:12px;overflow:hidden}
+th{background:#1f2a5c;color:#fff;text-align:left;padding:10px 12px}td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.tag{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700;color:#fff}
+.t-ok{background:var(--ok)}.t-bad{background:var(--bad)}.t-w{background:var(--warn)}.t-b{background:var(--brand)}
+.demo{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 2px 12px #1b243712}
+canvas{width:100%;height:480px;display:block;border-radius:12px;background:radial-gradient(circle at 30% 20%,#fbfcff,#eef2fb);cursor:crosshair;border:1px solid var(--line)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:10px 0}
+.btn{border:1px solid var(--line);background:#fff;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink)}
+.btn.on{background:var(--brand);color:#fff;border-color:var(--brand)}.btn:hover{border-color:var(--brand)}
+.read{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}.pill{background:#f1f4fb;border-radius:10px;padding:6px 12px;font-size:13.5px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--mut);margin-top:8px}.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:10px 0}summary{cursor:pointer;font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:760px){.two{grid-template-columns:1fr}.arrow{display:none}}
+.q{font-weight:700;color:var(--brand2)}
+footer{text-align:center;color:var(--mut);font-size:13px;padding:30px}
+svg text{font-family:inherit}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>How Face Match Works</h1>
+  <p>A plain-language, visual walk through the whole project: how a photo becomes a searchable fingerprint, how Qdrant stores it, how exact search and HNSW find the closest face, and how the graph behind HNSW is built.</p>
+  <div class="chips"><span class="chip">antelopev2</span><span class="chip">SCRFD + glintr100</span><span class="chip">Cosine similarity</span><span class="chip">Qdrant on Colima</span><span class="chip">Exact vs HNSW</span></div>
+</div>
+<nav>
+  <a href="#overview">Big picture</a><a href="#detect">Detect &amp; align</a><a href="#embed">Embeddings</a><a href="#cosine">Cosine</a><a href="#qdrant">Qdrant</a><a href="#search">Search types</a><a href="#hnsw">HNSW graph</a><a href="#demo">Live demo</a><a href="#edge">Edge value?</a><a href="#params">Knobs</a><a href="#others">Other algorithms</a><a href="#decision">Decisions</a><a href="#glossary">Glossary</a>
+</nav>
+
+<main>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <h2><span class="n">1</span>The big picture</h2>
+  <p class="lead">Face matching turns the question <em>"is this the same person?"</em> into a geometry problem: every face becomes a point in space, and similar faces land close together.</p>
+  <div class="flow">
+    <div class="step"><span class="no">1</span><h4>Photo in</h4><p>Any image: an ID photo, a selfie.</p></div><div class="arrow">&rarr;</div>
+    <div class="step"><span class="no">2</span><h4>Detect</h4><p>SCRFD finds the face and 5 landmarks.</p></div><div class="arrow">&rarr;</div>
+    <div class="step"><span class="no">3</span><h4>Align</h4><p>Rotate and crop to a standard 112&times;112 square.</p></div><div class="arrow">&rarr;</div>
+    <div class="step"><span class="no">4</span><h4>Embed</h4><p>glintr100 turns the crop into 512 numbers.</p></div><div class="arrow">&rarr;</div>
+    <div class="step"><span class="no">5</span><h4>Store / Search</h4><p>Qdrant keeps vectors and finds the nearest ones.</p></div><div class="arrow">&rarr;</div>
+    <div class="step"><span class="no">6</span><h4>Decide</h4><p>A similarity threshold says match, review, or no match.</p></div>
+  </div>
+  <div class="grid">
+    <div class="card"><h3 style="margin-top:0">Two jobs, one pipeline</h3><p><b>Enrolling</b> a person: run steps 1-4 and <em>store</em> the vector with a name or ID. <b>Searching</b>: run steps 1-4 on a new photo and <em>ask</em> Qdrant for the closest stored vectors. Only the last step differs.</p></div>
+    <div class="card"><h3 style="margin-top:0">1:N and 1:1</h3><p><b>1:N identification</b> (who is this among everyone enrolled?) is what we tested. <b>1:1 verification</b> (are these two photos the same person?) is just one cosine comparison, no database needed.</p></div>
+    <div class="card"><h3 style="margin-top:0">Where the work happens</h3><p>The models run on your Mac through ONNX Runtime. Only the vector database (Qdrant) lives in a container inside <b>Colima</b>, a small Linux VM that runs Docker on macOS.</p></div>
+  </div>
+</section>
+
+<!-- DETECT & ALIGN -->
+<section id="detect">
+  <h2><span class="n">2</span>Detecting and aligning the face</h2>
+  <p class="lead">The recognizer is picky: it expects an upright face, centered, at a fixed size. Getting there takes two steps.</p>
+  <div class="two">
+    <div class="card">
+      <h3 style="margin-top:0">SCRFD: "where is the face?"</h3>
+      <p>The file <code>scrfd_10g_bnkps.onnx</code> is a <b>detector</b>. For every face it returns a box, a confidence score, and <b>5 landmark points</b>: both eyes, the nose tip and both mouth corners ("bnkps" = box + keypoints). It does <i>not</i> rotate or crop anything.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Alignment: "make it standard"</h3>
+      <p>Code (<code>face_align.norm_crop</code>) takes those 5 points and finds the rotate + scale + shift that moves them onto a fixed template. Then it warps the picture into a <b>112&times;112</b> crop. Eyes always end up level and in the same spot.</p>
+    </div>
+  </div>
+  <div class="card" style="text-align:center">
+    <svg viewBox="0 0 760 230" width="100%" style="max-width:760px">
+      <rect x="10" y="10" width="220" height="210" rx="14" fill="#eef2ff" stroke="#c9d3f5"/>
+      <g transform="rotate(-18 120 118)"><ellipse cx="120" cy="118" rx="55" ry="72" fill="#ffe3c8" stroke="#d9a074"/>
+      <circle cx="98" cy="100" r="5" fill="#e03131"/><circle cx="142" cy="100" r="5" fill="#e03131"/><circle cx="120" cy="128" r="5" fill="#e03131"/><circle cx="101" cy="154" r="5" fill="#e03131"/><circle cx="139" cy="154" r="5" fill="#e03131"/></g>
+      <text x="120" y="212" text-anchor="middle" font-size="12" fill="#5b6678">tilted photo + 5 landmarks (red)</text>
+      <path d="M250 118 h95" stroke="#3b5bdb" stroke-width="3" marker-end="url(#a)"/><text x="298" y="104" text-anchor="middle" font-size="12" fill="#3b5bdb">rotate · scale · shift</text>
+      <defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#3b5bdb"/></marker></defs>
+      <rect x="370" y="25" width="180" height="180" rx="6" fill="#f3fbf5" stroke="#9bd3a8"/>
+      <ellipse cx="460" cy="115" rx="52" ry="68" fill="#ffe3c8" stroke="#d9a074"/>
+      <circle cx="440" cy="98" r="5" fill="#e03131"/><circle cx="480" cy="98" r="5" fill="#e03131"/><circle cx="460" cy="125" r="5" fill="#e03131"/><circle cx="443" cy="152" r="5" fill="#e03131"/><circle cx="477" cy="152" r="5" fill="#e03131"/>
+      <text x="460" y="222" text-anchor="middle" font-size="12" fill="#5b6678">aligned 112×112 crop</text>
+      <path d="M570 118 h60" stroke="#3b5bdb" stroke-width="3" marker-end="url(#a)"/>
+      <rect x="640" y="75" width="110" height="86" rx="10" fill="#f0e9ff" stroke="#c3adf5"/><text x="695" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="#5b3fd0">glintr100</text><text x="695" y="132" text-anchor="middle" font-size="11" fill="#5b3fd0">512 numbers</text>
+    </svg>
+  </div>
+  <div class="callout warn"><b class="t">Why alignment matters</b>Skip it and the same person photographed at a slight tilt looks like a different point in space. Many "bad matches" are really "badly aligned" matches. The benchmark images we used (VGGFace2 112&times;112) were already aligned, so detection was skipped there; real photos need the full pipeline.</div>
+  <div class="callout"><b class="t">What about the other model files?</b><code>2d106det</code> and <code>1k3d68</code> find denser landmarks, <code>genderage</code> guesses gender and age. None is needed for matching, so the project only uses <code>scrfd_10g_bnkps</code> and <code>glintr100</code>.</div>
+</section>
+
+<!-- EMBEDDINGS -->
+<section id="embed">
+  <h2><span class="n">3</span>Embeddings: a face becomes a point</h2>
+  <p class="lead">The recognition model <code>glintr100</code> is a deep neural network trained on millions of faces to do one thing: <b>photos of the same person should produce nearby points; different people should produce distant points.</b></p>
+  <div class="grid">
+    <div class="card"><h3 style="margin-top:0">An embedding is a list of numbers</h3><p>For each face the model outputs 512 numbers. You can picture it as coordinates of a point in a 512-dimensional space. Nobody can draw 512 dimensions, but the idea is the same as a dot on a 2D map: <i>closer = more alike</i>.</p></div>
+    <div class="card"><h3 style="margin-top:0">The numbers have no names</h3><p>No single number means "nose width" or "eye colour". The meaning is spread across all 512 and was <i>learned</i> by training. What matters is only the <b>relative distance</b> between points.</p></div>
+    <div class="card"><h3 style="margin-top:0">Normalization</h3><p>Each vector is scaled to length 1 ("L2 normalized"), so only its <b>direction</b> matters, not its size. This is what makes cosine similarity (next section) simple and fair.</p></div>
+  </div>
+  <div class="card" style="text-align:center">
+    <svg viewBox="0 0 720 270" width="100%" style="max-width:720px">
+      <rect x="2" y="2" width="716" height="266" rx="14" fill="#fbfcff" stroke="#e3e8f2"/>
+      <g fill="#3b5bdb"><circle cx="110" cy="90" r="7"/><circle cx="135" cy="110" r="7"/><circle cx="95" cy="125" r="7"/><circle cx="125" cy="70" r="7"/></g>
+      <ellipse cx="115" cy="98" rx="55" ry="48" fill="none" stroke="#3b5bdb" stroke-dasharray="5 4"/><text x="115" y="175" text-anchor="middle" font-size="13" font-weight="700" fill="#3b5bdb">Person A</text><text x="115" y="192" text-anchor="middle" font-size="11" fill="#5b6678">different photos, tight cluster</text>
+      <g fill="#e8590c"><circle cx="360" cy="180" r="7"/><circle cx="385" cy="200" r="7"/><circle cx="340" cy="210" r="7"/><circle cx="375" cy="165" r="7"/></g>
+      <ellipse cx="362" cy="187" rx="55" ry="48" fill="none" stroke="#e8590c" stroke-dasharray="5 4"/><text x="362" y="255" text-anchor="middle" font-size="13" font-weight="700" fill="#e8590c">Person B</text>
+      <g fill="#2f9e44"><circle cx="590" cy="85" r="7"/><circle cx="615" cy="105" r="7"/><circle cx="575" cy="115" r="7"/></g>
+      <ellipse cx="595" cy="98" rx="50" ry="42" fill="none" stroke="#2f9e44" stroke-dasharray="5 4"/><text x="595" y="165" text-anchor="middle" font-size="13" font-weight="700" fill="#2f9e44">Person C</text>
+      <circle cx="205" cy="125" r="8" fill="#e03131"/><text x="228" y="122" font-size="13" font-weight="700" fill="#e03131">new photo</text><path d="M197 122 L150 112" stroke="#e03131" stroke-width="2" stroke-dasharray="4 3"/><text x="170" y="100" font-size="11" fill="#e03131">nearest = Person A</text>
+    </svg>
+    <div style="color:#5b6678;font-size:13px">Simplified to 2 dimensions. Searching = "which stored cluster is the new photo closest to?"</div>
+  </div>
+</section>
+
+<!-- COSINE -->
+<section id="cosine">
+  <h2><span class="n">4</span>Cosine similarity: how "close" is measured</h2>
+  <p class="lead">To compare two faces we look at the <b>angle</b> between their vectors. A small angle means the vectors point the same way, so the faces are alike.</p>
+  <div class="grid">
+    <div class="card" style="grid-column:span 2">
+      <div class="two" style="align-items:center">
+        <div style="text-align:center">
+          <svg id="cosSvg" viewBox="0 0 300 260" width="100%" style="max-width:340px">
+            <circle cx="150" cy="130" r="100" fill="#f8faff" stroke="#e3e8f2"/>
+            <line x1="150" y1="130" x2="250" y2="130" stroke="#3b5bdb" stroke-width="4" marker-end="url(#ab)"/>
+            <line id="vecB" x1="150" y1="130" x2="250" y2="130" stroke="#e8590c" stroke-width="4" marker-end="url(#ao)"/>
+            <path id="arc" d="" fill="none" stroke="#7048e8" stroke-width="2"/>
+            <defs><marker id="ab" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#3b5bdb"/></marker><marker id="ao" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#e8590c"/></marker></defs>
+            <text x="258" y="126" font-size="12" fill="#3b5bdb" font-weight="700">face 1</text><text id="lblB" x="258" y="126" font-size="12" fill="#e8590c" font-weight="700">face 2</text>
+          </svg>
+        </div>
+        <div>
+          <div class="ctl"><label for="ang"><b>Angle between the two faces</b></label></div>
+          <input id="ang" type="range" min="0" max="180" value="35" style="width:100%">
+          <div class="read"><span class="pill">Angle: <b id="angv">35°</b></span><span class="pill">Cosine: <b id="cosv">0.82</b></span><span class="pill">Match %: <b id="pctv">82%</b></span></div>
+          <p id="cosTxt" style="margin-top:12px"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card"><h3 style="margin-top:0">Reading the value</h3><p><b>1</b> = identical direction (same face). <b>0</b> = unrelated (right angle). Negative = opposite. For real faces, different people typically land low and the same person lands noticeably higher.</p></div>
+    <div class="card"><h3 style="margin-top:0">Why angle and not distance?</h3><p>Normalized vectors all have length 1, so they sit on the surface of a sphere. The straight-line distance and the angle are tied together, and cosine is cheap: one dot product.</p></div>
+    <div class="card"><h3 style="margin-top:0">"Match %" is not a probability</h3><p>We show cosine &times; 100 as "match %" for readability. 45% does <b>not</b> mean "45% chance it is the same person". It is a similarity score, and the threshold that separates "same" from "different" has to be chosen by testing.</p></div>
+  </div>
+</section>
+
+<!-- QDRANT -->
+<section id="qdrant">
+  <h2><span class="n">5</span>Qdrant: the vector database</h2>
+  <p class="lead">A normal database answers "find rows where name = X". A vector database answers <b>"find the stored vectors nearest to this one"</b>. Qdrant does that, quickly, and keeps the data on disk.</p>
+  <div class="grid">
+    <div class="card"><h3 style="margin-top:0">Collection</h3><p>A named table of vectors that share the same size and distance rule. Ours: 512 numbers each, cosine distance.</p></div>
+    <div class="card"><h3 style="margin-top:0">Point</h3><p>One stored item: an <b>ID</b>, the <b>vector</b>, and an optional <b>payload</b> (extra info such as the person's name, the image path, merchant ID).</p></div>
+    <div class="card"><h3 style="margin-top:0">Segments and the optimizer</h3><p>Qdrant stores points in chunks called segments. In the background an <b>optimizer</b> decides when a segment is big enough to be worth indexing and builds the search index for it.</p></div>
+    <div class="card"><h3 style="margin-top:0">Docker + Colima</h3><p>Qdrant ships as a Docker container. Docker needs Linux, so on a Mac <b>Colima</b> runs a tiny Linux VM that hosts it. Our code talks to it over <code>localhost:6333</code>.</p></div>
+  </div>
+  <div class="callout"><b class="t">Cosine inside Qdrant</b>When a collection uses cosine distance, Qdrant normalizes each vector as it is stored. After that, comparing two vectors is just a dot product, which is very fast.</div>
+</section>
+
+<!-- SEARCH TYPES -->
+<section id="search">
+  <h2><span class="n">6</span>Two ways to search: exact and approximate</h2>
+  <p class="lead">"Index" simply means <b>an extra structure built ahead of time so that searching later is faster</b>. The two approaches trade accuracy against speed.</p>
+  <div class="two">
+    <div class="card">
+      <h3 style="margin-top:0">Exact search (flat / brute force)</h3>
+      <p><span class="tag t-ok">no index</span> The vectors sit in a plain list. For each query the database compares the query with <b>every</b> stored vector and keeps the best few.</p>
+      <ul><li>Always returns the true nearest faces.</li><li>No build step, no tuning.</li><li>Work grows in step with the collection size: double the faces, double the work.</li></ul>
+      <p style="margin-bottom:0">Perfect for small collections and for use as a <b>ground truth</b> to check an approximate method against.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Approximate search (ANN) e.g. HNSW</h3>
+      <p><span class="tag t-b">index built first</span> A navigation structure is prepared so a query only visits a small neighbourhood of promising vectors instead of all of them.</p>
+      <ul><li>Much faster at large sizes.</li><li>Usually finds the true nearest, but can occasionally miss.</li><li>Has settings to trade speed for accuracy, and costs memory and build time.</li></ul>
+      <p style="margin-bottom:0">"ANN" = <i>Approximate Nearest Neighbour</i>.</p>
+    </div>
+  </div>
+  <div class="callout warn"><b class="t">Important detail about Qdrant</b>Qdrant only builds the HNSW index once a collection grows past a size limit (<code>indexing_threshold</code>). Below that it quietly does exact search. In this project the small test collections were effectively exact until we forced the index on.</div>
+</section>
+
+<!-- HNSW -->
+<section id="hnsw">
+  <h2><span class="n">7</span>HNSW: the graph, step by step</h2>
+  <p class="lead">HNSW = <b>Hierarchical Navigable Small World</b>. Read the name backwards: a <i>small world</i> network that you can <i>navigate</i>, organised in a <i>hierarchy</i> of layers.</p>
+
+  <h3>The graph: nodes and edges</h3>
+  <p>A graph is just <b>dots joined by lines</b>. Every stored face vector is a <b>node</b>. A line between two nodes (an <b>edge</b>) means "these two are neighbours". Each node keeps a short list of the neighbours it links to.</p>
+  <div class="callout"><b class="t">How many connections?</b>A node does <b>not</b> link to everyone. Each node holds only a small, capped number of links. The cap is the parameter <code>m</code> (Qdrant default 16) on the upper layers, and about double that on the bottom layer, which is the most detailed one. So a graph of thousands of nodes still has only a few dozen links per node. That limit keeps memory small and searching fast.</div>
+
+  <h3>The small-world idea</h3>
+  <p>Think of how you can reach almost anyone in the world through a short chain of acquaintances. Most of your friends are local, but a few know people far away, and those long-range links create shortcuts. HNSW links each node mainly to its <b>close</b> neighbours, plus a few links that reach <b>further</b> away. A search can then travel across the whole collection in a handful of hops.</p>
+
+  <h3>The hierarchy: layers like a road map</h3>
+  <div class="grid">
+    <div class="card"><h3 style="margin-top:0"><span style="color:var(--l3)">Top layers</span>: highways</h3><p>Very few nodes, with long links between them. Used to jump quickly into the right <i>region</i> of the data.</p></div>
+    <div class="card"><h3 style="margin-top:0"><span style="color:var(--l1)">Middle layers</span>: main roads</h3><p>More nodes, shorter links. Used to move closer to the target.</p></div>
+    <div class="card"><h3 style="margin-top:0"><span style="color:var(--l0)">Layer 0</span>: every street</h3><p>Contains <b>all</b> the nodes with fine, short-range links. Used for the careful final search.</p></div>
+  </div>
+
+  <h3>How a node's layer is chosen (it is random, not clustering)</h3>
+  <p>Layers are not built by grouping similar faces. When a node is inserted, the algorithm rolls a weighted die. The rule makes high layers <b>exponentially rare</b>:</p>
+  <ul>
+    <li>Almost every node lands only on layer 0.</li>
+    <li>A small fraction also appear on layer 1 (about one in <code>m</code>).</li>
+    <li>A still smaller fraction reach layer 2, and so on.</li>
+  </ul>
+  <p>A node that reaches layer 2 is present on layers 2, 1 and 0. This is the same trick as a <b>skip list</b>: random promotion naturally produces an express lane without anyone planning it. The first node to reach the highest layer becomes the global <b>entry point</b> for all searches.</p>
+
+  <h3>Inserting a new node (how links get made)</h3>
+  <div class="flow">
+    <div class="step"><span class="no">1</span><h4>Roll the layer</h4><p>Decide the highest layer this node will live on.</p></div><div class="arrow">&rarr;</div>
+    <div class="step"><span class="no">2</span><h4>Descend</h4><p>Start at the entry point on the top layer and hop greedily toward the new vector, layer by layer.</p></div><div class="arrow">&rarr;</div>
+    <div class="step"><span class="no">3</span><h4>Find neighbours</h4><p>On each layer the node belongs to, search for its closest nodes using a candidate list of size <code>ef_construct</code>.</p></div><div class="arrow">&rarr;</div>
+    <div class="step"><span class="no">4</span><h4>Link</h4><p>Connect to a chosen few and add the link back from them. Trim a neighbour's list if it grows past the cap.</p></div>
+  </div>
+  <div class="callout ok"><b class="t">Which neighbours get chosen? (the diversity trick)</b>Linking to the <i>closest</i> few would often give you five nodes all in the same direction, which makes poor roads. HNSW uses a heuristic: take candidates from closest to farthest and keep one only if it is closer to the new node than to the neighbours already kept. The result is links that fan out in <b>different directions</b>, including the occasional longer one that acts as a shortcut between clusters.</div>
+
+  <h3>Searching the graph</h3>
+  <div class="flow">
+    <div class="step"><span class="no">1</span><h4>Enter at the top</h4><p>Begin at the entry point on the highest layer.</p></div><div class="arrow">&rarr;</div>
+    <div class="step"><span class="no">2</span><h4>Greedy hop</h4><p>Move to whichever linked node is closer to the query. Repeat until no neighbour is closer.</p></div><div class="arrow">&rarr;</div>
+    <div class="step"><span class="no">3</span><h4>Drop a layer</h4><p>Take that node down to the next layer and repeat. The map zooms in.</p></div><div class="arrow">&rarr;</div>
+    <div class="step"><span class="no">4</span><h4>Beam search on layer 0</h4><p>Keep a list of the <code>ef</code> best candidates and keep exploring around them until nothing better turns up.</p></div>
+  </div>
+  <p>Because each hop moves closer and the upper layers do the long-distance travel, only a small part of the collection is ever examined. That is why speed barely changes as the collection grows, while exact search keeps getting slower.</p>
+  <div class="callout bad"><b class="t">Why HNSW can miss</b>The walk is greedy. If it heads into a slightly wrong neighbourhood early on, the truly closest face may never be visited. A larger <code>ef</code> keeps more backup candidates alive, giving the search more chances to recover. That is the whole accuracy-versus-speed dial.</div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <h2><span class="n">8</span>Try it: a tiny HNSW you can click</h2>
+  <p class="lead">This is a simplified 2D toy of the real thing (the real one has 512 dimensions). <b>Click anywhere on the map</b> to drop a query point and watch the search travel down the layers.</p>
+  <div class="demo">
+    <div class="ctl"><b>Show layer:</b><span id="layerBtns"></span>
+      <label style="margin-left:auto"><b>ef</b> (candidates kept) <input id="ef" type="range" min="1" max="12" value="4"> <b id="efv">4</b></label>
+      <button class="btn" id="reset">Reset</button></div>
+    <canvas id="hn"></canvas>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--l0)"></i>layer 0 only</span><span><i class="dot" style="background:var(--l1)"></i>reaches layer 1</span><span><i class="dot" style="background:var(--l2)"></i>reaches layer 2</span><span><i class="dot" style="background:var(--l3)"></i>reaches layer 3 (entry point)</span>
+      <span><i class="dot" style="background:#111"></i>search path</span><span><i class="dot" style="background:var(--warn)"></i>nodes examined</span><span><i class="dot" style="background:var(--ok)"></i>HNSW answer</span><span><i class="dot" style="border:2px dashed #1971c2;background:none"></i>true nearest</span>
+    </div>
+    <div class="read"><span class="pill" id="r1">Click the map to search</span><span class="pill" id="r2"></span><span class="pill" id="r3"></span></div>
+    <p style="color:var(--mut);font-size:13.5px;margin-bottom:0">Try <b>ef = 1</b> and click several places, especially between clusters: now and then the green answer will not be the dashed true nearest. Raise <b>ef</b> and misses become rare, at the cost of more distance calculations. Switch the layer buttons to see how sparse the upper layers are. Dots are clustered on purpose, like several people's photos. <i>Simplification:</i> each node is linked to its nearest already-inserted nodes, without the real algorithm's diversity heuristic.</p>
+  </div>
+</section>
+
+<!-- EDGE VALUE -->
+<section id="edge">
+  <h2><span class="n">9</span>Is the edge value the cosine?</h2>
+  <p class="lead">Short answer: <b>no, edges carry no value at all</b>. The cosine decides <i>who gets linked</i> and <i>which way to walk</i>, but it is not stored on the line.</p>
+  <div class="two">
+    <div class="card">
+      <h3 style="margin-top:0">What an edge really is</h3>
+      <p>An edge is just a pointer: "node 17 lists node 42 as a neighbour". The index is essentially a list of neighbour IDs per node per layer. There is no weight, no score, no distance saved with it.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Where the cosine is used</h3>
+      <ul style="margin:0"><li><b>While building:</b> to rank candidate neighbours and pick which ones to link.</li><li><b>While searching:</b> every time the walk reaches a node it computes the similarity between the query and that node's vector, on the fly, to decide where to go next.</li></ul>
+    </div>
+  </div>
+  <div class="callout"><b class="t">Why not store it?</b>The score depends on the query. The "closeness" of two linked nodes is already recoverable from their vectors, and the useful number is always "how close is this node to <i>today's</i> query". Recomputing it is a single dot product, cheaper than storing and keeping weights consistent.</div>
+  <div class="callout warn"><b class="t">Two small truths</b>Links are not guaranteed to be mutual: A may list B while B has trimmed A from its own capped list, so the graph is technically directed. And HNSW does not require cosine: the same structure works with dot product or Euclidean distance. Cosine is just the rule we chose for this collection.</div>
+</section>
+
+<!-- PARAMS -->
+<section id="params">
+  <h2><span class="n">10</span>The knobs, in plain words</h2>
+  <table>
+    <tr><th>Setting</th><th>When it applies</th><th>What it does</th><th>Turning it up</th></tr>
+    <tr><td><code>m</code></td><td>build time</td><td>Maximum links per node (bottom layer allows about double).</td><td>Better accuracy and robustness; more memory, slower build.</td></tr>
+    <tr><td><code>ef_construct</code></td><td>build time</td><td>How many candidates to consider when choosing a new node's neighbours.</td><td>Higher quality graph; slower build. Fixed once the index exists.</td></tr>
+    <tr><td><code>hnsw_ef</code> ("ef")</td><td>every query</td><td>Size of the candidate list during the layer-0 search.</td><td>Closer to exact results; a bit slower per query. Adjustable per query.</td></tr>
+    <tr><td><code>exact</code></td><td>every query</td><td>Ignore the graph and scan everything.</td><td>Perfect results; slowest. Used as ground truth.</td></tr>
+    <tr><td><code>indexing_threshold</code></td><td>collection</td><td>How big a segment must be before Qdrant builds the graph.</td><td>Lower it to force the graph on small collections.</td></tr>
+  </table>
+</section>
+
+<!-- OTHERS -->
+<section id="others">
+  <h2><span class="n">11</span>Other ways to do nearest-neighbour search</h2>
+  <p class="lead">HNSW is the most popular choice, but it is one of several families. Each answers the same question with a different shortcut.</p>
+  <table>
+    <tr><th>Family</th><th>Idea in one line</th><th>Good at</th><th>Weakness</th></tr>
+    <tr><td><b>Flat / brute force</b></td><td>Compare against everything.</td><td>Exact, simple, small data.</td><td>Slows down as data grows.</td></tr>
+    <tr><td><b>Tree-based</b><br>(KD-tree, Annoy)</td><td>Repeatedly split the space in halves; search only the relevant branches.</td><td>Low-dimensional data; Annoy is light and read-only.</td><td>Classic trees stop helping at hundreds of dimensions (the "curse of dimensionality").</td></tr>
+    <tr><td><b>Hashing</b><br>(LSH)</td><td>Hash vectors so similar ones tend to land in the same bucket.</td><td>Very simple, cheap memory.</td><td>Usually less accurate than graphs for the same speed.</td></tr>
+    <tr><td><b>Clustering</b><br>(IVF, "inverted file")</td><td>Group vectors into clusters; at query time search only the few closest clusters.</td><td>Large datasets, easy to scale and shard.</td><td>Misses if the answer sits in a cluster you skipped; needs a training step.</td></tr>
+    <tr><td><b>Compression</b><br>(scalar / product / binary quantization)</td><td>Store a smaller, rougher copy of each vector so more fit in memory and compare faster.</td><td>Huge collections, lower RAM.</td><td>Loses some precision; often paired with a re-check on the original vectors.</td></tr>
+    <tr><td><b>Graph-based</b><br>(HNSW, NSG, Vamana / DiskANN)</td><td>Link vectors to neighbours and walk the graph toward the query.</td><td>Best speed-versus-accuracy for most workloads.</td><td>Build time and memory for the links; hard to delete from cleanly.</td></tr>
+  </table>
+  <div class="callout"><b class="t">What Qdrant offers</b>Qdrant's main index is HNSW. It can also compress vectors (quantization) and keep data on disk, and these can be combined with HNSW at very large scale. DiskANN-style graphs are designed for datasets bigger than RAM.</div>
+</section>
+
+<!-- DECISION -->
+<section id="decision">
+  <h2><span class="n">12</span>From a score to a decision</h2>
+  <p class="lead">Search returns the closest stored faces and a similarity for each. Turning that into "match / no match" is a policy choice.</p>
+  <div class="grid">
+    <div class="card"><h3 style="margin-top:0"><span class="tag t-ok">accept</span> high similarity</h3><p>Top result scores above the upper cut-off. Treat as the same person. Safest zone: very few wrong names.</p></div>
+    <div class="card"><h3 style="margin-top:0"><span class="tag t-w">review</span> the grey zone</h3><p>Plausible but not certain. Send to a human or a second check. This protects against confident mistakes.</p></div>
+    <div class="card"><h3 style="margin-top:0"><span class="tag t-bad">no match</span> low similarity</h3><p>Nobody enrolled looks close enough. Correct for people who were never enrolled, but also where genuine hard photos end up.</p></div>
+  </div>
+  <h3>The two kinds of error</h3>
+  <div class="two">
+    <div class="card"><b>False negative (a miss).</b> A person who <i>is</i> enrolled is not matched. Usually harmless: the case just goes to review.</div>
+    <div class="card"><b>False match (a wrong name).</b> The system confidently names the wrong person, or accepts someone who is not enrolled. This is the costly one, so thresholds are set to keep it rare.</div>
+  </div>
+  <div class="callout"><b class="t">Raising the threshold</b>makes the system more careful: fewer wrong names, but more people sent to review. Lowering it does the opposite. There is no free setting, only a trade-off that you pick based on the cost of each kind of error.</div>
+  <h3>How we measured it</h3>
+  <ul>
+    <li><b>Top-1 / Top-5 / Top-10:</b> is the right person the first result, or somewhere in the first 5 or 10?</li>
+    <li><b>Enrolled vs unknown:</b> some test photos belong to people never stored, to check the system correctly says "not found".</li>
+    <li><b>Exact vs HNSW:</b> same data, both searches, to see what the shortcut costs.</li>
+    <li><b>Duplicate detection:</b> run the same search across a customer database to flag one person registered under several IDs.</li>
+  </ul>
+  <p>The numbers themselves live in the Excel report and the charts dashboard; this guide is about <i>how</i> it all works.</p>
+</section>
+
+<!-- CAVEATS -->
+<section id="caveats">
+  <h2><span class="n">13</span>Things to remember</h2>
+  <div class="callout warn"><b class="t">Benchmark photos are the easy case</b>Test faces came from a clean, pre-aligned public dataset. Real ID-photo-versus-selfie pairs are harder (age gap, lighting, small or blurry faces), so thresholds must be re-checked on real data.</div>
+  <div class="callout bad"><b class="t">Licensing</b>The antelopev2 model weights and the VGGFace2 dataset are for non-commercial research use. Confirm licensing before any production use.</div>
+  <div class="callout"><b class="t">Matching is not the same as proving it is a live person</b>A printed photo or a screen replay can still produce a high similarity. If this is used for authentication or KYC, a separate liveness (anti-spoofing) check is needed.</div>
+</section>
+
+<!-- GLOSSARY -->
+<section id="glossary">
+  <h2><span class="n">14</span>Glossary</h2>
+  <table>
+    <tr><th style="width:210px">Term</th><th>Meaning</th></tr>
+    <tr><td>Embedding / vector</td><td>The list of 512 numbers that represents a face.</td></tr>
+    <tr><td>Cosine similarity</td><td>Closeness measured by the angle between two vectors (1 = same direction).</td></tr>
+    <tr><td>L2 normalization</td><td>Scaling a vector to length 1 so only direction counts.</td></tr>
+    <tr><td>Landmarks / keypoints</td><td>The 5 facial points (eyes, nose, mouth corners) used for alignment.</td></tr>
+    <tr><td>Alignment</td><td>Rotating and scaling a face so landmarks match a standard template.</td></tr>
+    <tr><td>ONNX / ONNX Runtime</td><td>A portable model file format and the engine that runs it on CPU or GPU.</td></tr>
+    <tr><td>Gallery</td><td>The set of enrolled faces you search against.</td></tr>
+    <tr><td>Probe</td><td>The new photo you are trying to identify.</td></tr>
+    <tr><td>1:N / 1:1</td><td>Search one probe against many people / compare one probe with one specific person.</td></tr>
+    <tr><td>Index</td><td>A structure built in advance to make searching faster.</td></tr>
+    <tr><td>ANN</td><td>Approximate nearest neighbour search; fast, may miss occasionally.</td></tr>
+    <tr><td>Node / edge</td><td>A stored vector / a link between two neighbouring vectors in the graph.</td></tr>
+    <tr><td>Layer</td><td>One level of the HNSW hierarchy; layer 0 has all nodes, higher ones have fewer.</td></tr>
+    <tr><td>Entry point</td><td>The node on the top layer where every search starts.</td></tr>
+    <tr><td>Recall</td><td>How often an approximate search returns what exact search would have.</td></tr>
+    <tr><td>Threshold</td><td>The similarity cut-off that separates match from no match.</td></tr>
+    <tr><td>False match / false negative</td><td>Wrong name accepted / real person missed.</td></tr>
+    <tr><td>Colima</td><td>A lightweight Linux VM that runs Docker on a Mac.</td></tr>
+  </table>
+</section>
+
+</main>
+<footer>Face Match project guide · antelopev2 + Qdrant · concepts simplified for clarity (real graphs have 512 dimensions and many thousands of nodes)</footer>
+
+<script>
+/* ---------- cosine demo ---------- */
+(function(){
+  const r=document.getElementById('ang'),vb=document.getElementById('vecB'),arc=document.getElementById('arc'),lb=document.getElementById('lblB');
+  function upd(){
+    const a=+r.value,t=a*Math.PI/180,L=100,cx=150,cy=130;
+    const x=cx+L*Math.cos(t),y=cy-L*Math.sin(t);
+    vb.setAttribute('x2',x);vb.setAttribute('y2',y);
+    lb.setAttribute('x',cx+(L+8)*Math.cos(t));lb.setAttribute('y',cy-(L+8)*Math.sin(t)+4);
+    const rr=38,ex=cx+rr*Math.cos(t),ey=cy-rr*Math.sin(t);
+    arc.setAttribute('d',a<1?'':`M ${cx+rr} ${cy} A ${rr} ${rr} 0 ${a>180?1:0} 0 ${ex} ${ey}`);
+    const c=Math.cos(t);
+    document.getElementById('angv').textContent=a+'°';
+    document.getElementById('cosv').textContent=c.toFixed(2);
+    document.getElementById('pctv').textContent=Math.round(c*100)+'%';
+    document.getElementById('cosTxt').textContent=
+      a<15?'Almost the same direction: these two faces look nearly identical to the model.':
+      a<50?'Small angle: very similar. Typical of two photos of the same person.':
+      a<80?'Moderate angle: some resemblance, but this is the uncertain zone where thresholds matter.':
+      a<100?'Close to a right angle: essentially unrelated faces.':'Pointing away from each other: very different.';
+  }
+  r.addEventListener('input',upd);upd();
+})();
+
+/* ---------- HNSW toy ---------- */
+(function(){
+  const cv=document.getElementById('hn'),ctx=cv.getContext('2d');
+  let W=0,H=0;
+  function rng(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  const R=rng(7),N=70,M=3,mL=1/Math.log(M);
+  const centers=[[.2,.25],[.75,.2],[.5,.55],[.18,.78],[.82,.75],[.5,.12]];
+  const pts=[];
+  for(let i=0;i<N;i++){
+    const c=centers[i%centers.length];
+    const u=R()||1e-9,v=R(),g=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+    const u2=R()||1e-9,v2=R(),g2=Math.sqrt(-2*Math.log(u2))*Math.cos(2*Math.PI*v2);
+    pts.push([Math.min(.97,Math.max(.03,c[0]+g*.07)),Math.min(.95,Math.max(.05,c[1]+g2*.07))]);
+  }
+  const lvl=pts.map(()=>Math.min(3,Math.floor(-Math.log(1-R())*mL)));
+  let maxL=Math.max(...lvl);
+  if(maxL<2){lvl[0]=2;lvl[7]=2;lvl[20]=1;maxL=2;}
+  const entry=lvl.indexOf(maxL);
+  const d2=(a,b)=>{const dx=a[0]-b[0],dy=a[1]-b[1];return dx*dx+dy*dy};
+  const adj=[];
+  for(let l=0;l<=maxL;l++){
+    /* build like HNSW: insert nodes one by one, link each to its nearest already-inserted nodes (both ways), cap the list */
+    const K=l===0?5:2,CAP=2*K,A={},done=[];
+    for(let i=0;i<N;i++){
+      if(lvl[i]<l)continue;A[i]=new Set();
+      done.slice().sort((a,b)=>d2(pts[i],pts[a])-d2(pts[i],pts[b])).slice(0,K).forEach(j=>{
+        A[i].add(j);A[j].add(i);
+        if(A[j].size>CAP)A[j]=new Set([...A[j]].sort((a,b)=>d2(pts[j],pts[a])-d2(pts[j],pts[b])).slice(0,CAP));
+      });
+      done.push(i);
+    }
+    adj.push(A);
+  }
+  let view='all',q=null,ef=4,ev=[],step=0,timer=null,S=null;
+  const lc=['#9aa5b8','#3b5bdb','#7048e8','#e03131'];
+
+  function build(){
+    const box=document.getElementById('layerBtns');box.innerHTML='';
+    ['all',...Array.from({length:maxL+1},(_,i)=>i)].forEach(v=>{
+      const b=document.createElement('button');b.className='btn'+(v===view?' on':'');b.textContent=v==='all'?'All':'Layer '+v;
+      b.onclick=()=>{view=v;build();draw()};box.appendChild(b);
+    });
+  }
+  function resize(){
+    const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+    cv.width=r.width*dpr;cv.height=r.height*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);W=r.width;H=r.height;draw();
+  }
+  const P=i=>[pts[i][0]*W,pts[i][1]*H];
+
+  function run(){
+    clearInterval(timer);
+    const dist=new Set(),events=[],dd=i=>{dist.add(i);return d2(pts[i],q)};
+    let ep=entry,cur=entry;dd(cur);
+    events.push({t:'move',l:maxL,n:cur});
+    for(let l=maxL;l>=1;l--){
+      cur=ep;let imp=true;
+      while(imp){
+        imp=false;let best=cur,bd=dd(cur);
+        for(const nb of adj[l][cur]){const dn=dd(nb);if(dn<bd){bd=dn;best=nb}}
+        if(best!==cur){cur=best;imp=true;events.push({t:'move',l,n:cur})}
+      }
+      ep=cur;
+      if(l>1||true)events.push({t:'drop',l:l-1,n:ep});
+    }
+    const vis=new Set([ep]),C=[ep],Wl=[ep];dd(ep);events.push({t:'visit',n:ep});
+    const far=()=>Wl.reduce((a,b)=>d2(pts[a],q)>d2(pts[b],q)?a:b);
+    while(C.length){
+      C.sort((a,b)=>d2(pts[a],q)-d2(pts[b],q));
+      const c=C.shift(),f=far();
+      if(d2(pts[c],q)>d2(pts[f],q)&&Wl.length>=ef)break;
+      for(const e of adj[0][c]){
+        if(vis.has(e))continue;vis.add(e);const de=dd(e);events.push({t:'visit',n:e});
+        if(Wl.length<ef||de<d2(pts[far()],q)){C.push(e);Wl.push(e);if(Wl.length>ef){const fr=far();Wl.splice(Wl.indexOf(fr),1)}}
+      }
+    }
+    Wl.sort((a,b)=>d2(pts[a],q)-d2(pts[b],q));
+    let tn=0;for(let i=1;i<N;i++)if(d2(pts[i],q)<d2(pts[tn],q))tn=i;
+    S={path:[],visited:new Set(),cur:null,done:false,result:Wl[0],truth:tn,checks:0,total:dist.size};
+    ev=events;step=0;view='all';build();
+    timer=setInterval(()=>{
+      if(step>=ev.length){clearInterval(timer);S.done=true;S.cur=null;readout();draw();return}
+      const e=ev[step++];
+      if(e.t==='move'){S.path.push({l:e.l,n:e.n});S.cur=e.n;S.visited.add(e.n)}
+      else if(e.t==='visit'){S.visited.add(e.n);S.cur=e.n}
+      else if(e.t==='drop'){S.cur=e.n}
+      S.checks=S.visited.size;readout();draw();
+    },230);
+  }
+  function readout(){
+    const r1=document.getElementById('r1'),r2=document.getElementById('r2'),r3=document.getElementById('r3');
+    if(!S){r1.textContent='Click the map to search';r2.textContent='';r3.textContent='';return}
+    r1.textContent=`Distance calculations: ${S.done?S.total:S.checks} of ${N}`;
+    r2.textContent=`Exact search would calculate: ${N} of ${N}`;
+    r3.textContent=S.done?(S.result===S.truth?'HNSW found the true nearest':'HNSW missed the true nearest (try a larger ef)'):'Searching...';
+    r3.style.background=S.done?(S.result===S.truth?'#ebf8ee':'#fdecec'):'#f1f4fb';
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const show=l=>view==='all'||view===l;
+    for(let l=0;l<=maxL;l++){
+      if(!show(l))continue;
+      ctx.lineWidth=l===0?1:1.6+l*.4;ctx.strokeStyle=lc[l]+(view==='all'?(l===0?'55':'99'):'cc');
+      const seen=new Set();
+      for(const i in adj[l])for(const j of adj[l][i]){
+        const k=Math.min(i,j)+'-'+Math.max(i,j);if(seen.has(k))continue;seen.add(k);
+        const a=P(+i),b=P(j);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();
+      }
+    }
+    if(S){
+      ctx.strokeStyle='#111';ctx.lineWidth=3;ctx.beginPath();
+      S.path.forEach((p,i)=>{const a=P(p.n);i?ctx.lineTo(a[0],a[1]):ctx.moveTo(a[0],a[1])});ctx.stroke();
+    }
+    for(let i=0;i<N;i++){
+      if(view!=='all'&&lvl[i]<view)continue;
+      const [x,y]=P(i);ctx.beginPath();ctx.arc(x,y,3.5+lvl[i]*1.6,0,7);ctx.fillStyle=lc[lvl[i]];ctx.fill();
+      if(S&&S.visited.has(i)){ctx.beginPath();ctx.arc(x,y,9+lvl[i],0,7);ctx.strokeStyle='#f08c00';ctx.lineWidth=2.5;ctx.stroke()}
+    }
+    if(S){
+      if(S.done){
+        let [x,y]=P(S.result);ctx.beginPath();ctx.arc(x,y,9,0,7);ctx.fillStyle='#2f9e44';ctx.fill();
+        [x,y]=P(S.truth);ctx.beginPath();ctx.arc(x,y,15,0,7);ctx.setLineDash([5,4]);ctx.strokeStyle='#1971c2';ctx.lineWidth=2.5;ctx.stroke();ctx.setLineDash([]);
+      }
+      if(S.cur!=null){const [x,y]=P(S.cur);ctx.beginPath();ctx.arc(x,y,12,0,7);ctx.strokeStyle='#111';ctx.lineWidth=3;ctx.stroke()}
+    }
+    if(q){
+      const x=q[0]*W,y=q[1]*H;ctx.strokeStyle='#e03131';ctx.lineWidth=3;ctx.beginPath();
+      ctx.moveTo(x-9,y-9);ctx.lineTo(x+9,y+9);ctx.moveTo(x+9,y-9);ctx.lineTo(x-9,y+9);ctx.stroke();
+      ctx.fillStyle='#e03131';ctx.font='700 12px sans-serif';ctx.fillText('query',x+12,y-10);
+    }
+  }
+  cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect();q=[(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height];run()});
+  document.getElementById('ef').addEventListener('input',e=>{ef=+e.target.value;document.getElementById('efv').textContent=ef;if(q)run()});
+  document.getElementById('reset').onclick=()=>{clearInterval(timer);q=null;S=null;view='all';build();readout();draw()};
+  window.addEventListener('resize',resize);build();resize();readout();
+})();
+</script>
+</body>
+</html>

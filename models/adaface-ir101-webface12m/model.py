@@ -1,0 +1,24 @@
+"""AdaFace IR101 WebFace12M (CVLface): model definition for the benchmark (see README.md in this folder)."""
+
+from benchmark.loaders import cvlface
+
+
+INFO = {'name': 'AdaFace IR101 WebFace12M (CVLface)',
+ 'family': 'CVLface (minchul)',
+ 'arch': 'AdaFace, IResNet-101',
+ 'weights': 'https://huggingface.co/minchul/cvlface_adaface_ir101_webface12m',
+ 'code': 'https://github.com/mk-minchul/CVLface',
+ 'paper': 'https://arxiv.org/abs/2204.00964',
+ 'training_data': 'WebFace12M',
+ 'license': "model card: 'follow the license of the training dataset'",
+ 'license_class': 'unknown',
+ 'pre': 'PyTorch, RGB, (x/255-0.5)/0.5, 112x112',
+ 'notes': 'Needs transformers==4.44.2, fvcore, omegaconf, einops. Run in its own process (CVLface models share a `models` package name).',
+ 'params': None,
+ 'weights_file_bytes': None}
+
+
+
+def build():
+    """Return fn(uint8 BGR (n,112,112,3)) -> (n,d) embeddings."""
+    return cvlface("minchul/cvlface_adaface_ir101_webface12m")

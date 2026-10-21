@@ -1,0 +1,18 @@
+{
+ "dim": 512,
+ "img_per_s": 219,
+ "top1": 0.6970833333333334,
+ "top5": 0.801125,
+ "top10": 0.834375,
+ "genuine_sim_median": 0.4431139826774597,
+ "impostor_best_sim_median": 0.35121870040893555,
+ "found@unknown_accept_1%": 0.4492083333333333,
+ "thr@unknown_accept_1%": 0.4618947207927704,
+ "found@unknown_accept_5%": 0.53475,
+ "thr@unknown_accept_5%": 0.42748162150382996,
+ "TAR@FAR=0.001": 0.8112083333333333,
+ "TAR@FAR=0.0001": 0.688625,
+ "EER": 0.054085731366383887,
+ "training_data": "commercially + publicly available data (per model card)",
+ "license": "Apache-2.0"
+}

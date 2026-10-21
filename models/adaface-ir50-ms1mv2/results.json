@@ -1,0 +1,18 @@
+{
+ "dim": 512,
+ "img_per_s": 252,
+ "top1": 0.8933333333333333,
+ "top5": 0.9180416666666666,
+ "top10": 0.9249166666666667,
+ "genuine_sim_median": 0.5196329951286316,
+ "impostor_best_sim_median": 0.24958272278308868,
+ "found@unknown_accept_1%": 0.7996666666666666,
+ "thr@unknown_accept_1%": 0.36291220784187317,
+ "found@unknown_accept_5%": 0.8456666666666667,
+ "thr@unknown_accept_5%": 0.322103351354599,
+ "TAR@FAR=0.001": 0.9234166666666667,
+ "TAR@FAR=0.0001": 0.9000833333333333,
+ "EER": 0.04628215088301734,
+ "training_data": "MS1MV2",
+ "license": "card: follow training-data licence"
+}

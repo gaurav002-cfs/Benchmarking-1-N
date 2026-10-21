@@ -1,0 +1,15 @@
+numpy
+pandas
+opencv-python-headless
+matplotlib
+onnxruntime            # onnxruntime-gpu on NVIDIA; the CoreML provider is used automatically on Apple Silicon
+torch
+torchvision
+timm
+huggingface_hub
+qdrant-client          # experiments only
+# --- model-specific extras ---
+# facenet-pytorch      # pip install --no-deps facenet-pytorch   (FaceNet models; --no-deps avoids a torch downgrade)
+# transformers==4.44.2 fvcore omegaconf einops   (CVLface models: AdaFace / ArcFace IR101, IR50)
+# transformers>=4.44   (CLIP)
+# mlx-vlm              (LLaVA pair test, Apple Silicon only; use a separate venv)

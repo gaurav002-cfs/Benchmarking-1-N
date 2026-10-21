@@ -1,0 +1,18 @@
+{
+ "dim": 512,
+ "img_per_s": 1626,
+ "top1": 0.8275416666666666,
+ "top5": 0.8829166666666667,
+ "top10": 0.8965833333333333,
+ "genuine_sim_median": 0.5633432865142822,
+ "impostor_best_sim_median": 0.3828200101852417,
+ "found@unknown_accept_1%": 0.6141666666666666,
+ "thr@unknown_accept_1%": 0.5160825252532959,
+ "found@unknown_accept_5%": 0.73625,
+ "thr@unknown_accept_5%": 0.45328614115715027,
+ "TAR@FAR=0.001": 0.8929166666666667,
+ "TAR@FAR=0.0001": 0.8429166666666666,
+ "EER": 0.047499794346614076,
+ "training_data": "WebFace260M subsets",
+ "license": "CC BY-NC-SA 4.0"
+}

@@ -1,0 +1,18 @@
+{
+ "dim": 512,
+ "img_per_s": 531,
+ "top1": 0.46675,
+ "top5": 0.614375,
+ "top10": 0.674625,
+ "genuine_sim_median": 0.5838937759399414,
+ "impostor_best_sim_median": 0.5930639505386353,
+ "found@unknown_accept_1%": 0.099375,
+ "thr@unknown_accept_1%": 0.7632932066917419,
+ "found@unknown_accept_5%": 0.19866666666666666,
+ "thr@unknown_accept_5%": 0.7093122005462646,
+ "TAR@FAR=0.001": 0.5737916666666667,
+ "TAR@FAR=0.0001": 0.3525,
+ "EER": 0.07386199822079359,
+ "training_data": "CASIA-WebFace",
+ "license": "MIT code; weights: timesler/facenet-pytorch"
+}

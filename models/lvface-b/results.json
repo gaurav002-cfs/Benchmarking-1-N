@@ -1,0 +1,18 @@
+{
+ "dim": 512,
+ "img_per_s": 5,
+ "top1": 0.932375,
+ "top5": 0.935625,
+ "top10": 0.9362916666666666,
+ "genuine_sim_median": 0.47807449102401733,
+ "impostor_best_sim_median": 0.23384910821914673,
+ "found@unknown_accept_1%": 0.926375,
+ "thr@unknown_accept_1%": 0.31064292788505554,
+ "found@unknown_accept_5%": 0.929375,
+ "thr@unknown_accept_5%": 0.2780802547931671,
+ "TAR@FAR=0.001": 0.9345416666666667,
+ "TAR@FAR=0.0001": 0.9328333333333333,
+ "EER": 0.05550868030059805,
+ "training_data": "Glint360K (same data as antelopev2 glintr100)",
+ "license": "card + code: MIT; weights/data terms unverified"
+}

@@ -1,0 +1,10 @@
+# large / licensed artefacts are not committed
+weights/
+work/
+work_*/
+vggface2_112x112/
+*.npz
+*.npy
+__pycache__/
+.venv*/
+.DS_Store
