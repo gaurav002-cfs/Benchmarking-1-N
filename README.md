@@ -14,7 +14,7 @@ Open-weight face-embedding models compared on a **1:N identification** task (fin
 3. **Bigger and better-trained wins, with diminishing returns:** LVFace-T to -B gains under 1 point of top-1; small/mobile models give up 10-25 points.
 4. **The commercially licensed models are the weakest** (AuraFace 69.71%, SFace 77.24%); the strongest are non-commercial or have unverified weight licences.
 5. **Face-specific models vastly beat general-purpose ones:** CLIP ViT-L/14 image features reach 27.05% top-1; LLaVA-1.5-7B is far behind on a same/different-person pair test (see [experiments](#experiments)).
-6. **HNSW needs care:** with default-ish settings it matches exact search on 8k real faces for `hnsw_ef >= 128`, but lost up to 4 points on a 100k synthetic gallery (see below).
+6. **HNSW needs tuning at scale:** `m=16, ef_construct=100` matches exact search on 8k real faces for `hnsw_ef >= 128`, but lost about 4 points of top-1 on a 99,499-person synthetic gallery. A heavier build (`m=32, ef_construct=200`) restores it (99.2% agreement with exact at `hnsw_ef=128`, 4.5 ms vs 8.3 ms exact) for about 2x the build time; settings that agree with exact search on 99.8%+ of probes are only about 5-22% faster than an exact scan at 100k (see [experiments](#experiments)).
 7. **Accuracy falls with gallery size** (synthetic faces: 96% top-1 at 500 people to 82% at 99,499) because impostors get closer, not because same-person similarity drops.
 
 ## Results: all 21 models
@@ -112,7 +112,27 @@ Top-1 / top-5 / top-10 at full size: **81.7% / 89.6% / 91.8%**. Unknown syntheti
 | hnsw_ef128 | 78.0% | 95.3% | 3.7 ms |
 | hnsw_ef256 | 80.3% | 98.1% | 4.8 ms |
 
-With these settings HNSW lost accuracy at 100k (e.g. `ef=128`: about 4 points of top-1). Heavier `m` / `ef_construct` / `hnsw_ef` were **not** tested yet.
+With these settings HNSW lost accuracy at 100k (e.g. `ef=128`: about 4 points of top-1). Heavier settings are tested in the next section.
+
+### Heavier HNSW build settings at 99,499 people · [`experiments/hnsw_tuning`](experiments/hnsw_tuning/)
+Same synthetic gallery and 10,000-probe sample, rebuilt in Qdrant with different `m` / `ef_construct` and searched at `hnsw_ef` 64-1024 (exact scan: **82.05% top-1, 8.3 ms**).
+
+| Build settings | `hnsw_ef` | Same top-1 as exact | Top-1 | p50 latency | Build time |
+|---|--:|--:|--:|--:|--:|
+| m=16 efc=100 (previous settings) | 128 | 95.44% | 78.20% | 3.63 ms | 58 s |
+| m=16 efc=100 (previous settings) | 512 | 99.31% | 81.45% | 7.04 ms | 58 s |
+| m=32 efc=200 | 128 | 99.19% | 81.30% | 4.52 ms | 124 s |
+| m=32 efc=200 | 256 | 99.80% | 81.85% | 6.46 ms | 124 s |
+| m=48 efc=400 | 128 | 99.57% | 81.67% | 5.36 ms | 220 s |
+| m=48 efc=400 | 256 | 99.95% | 82.01% | 7.93 ms | 220 s |
+
+![hnsw tuning](results/figures/hnsw_tuning.png)
+
+- The loss at 100k came mostly from the light build settings: `m=32, ef_construct=200` at `ef=128` is within 0.75 points of exact top-1 and agrees with it on 99.2% of probes.
+- Accuracy can also be bought back with a larger `hnsw_ef` on the old build, but at `ef=1024` its latency (9.34 ms) is no better than the exact scan.
+- Cost: build time grows with the settings (58 s -> 124 s -> 220 s here). At ~100k vectors near-exact HNSW is only modestly faster than an exact scan; the large speed advantage should appear at much bigger collections (not measured).
+- `default_segment_number=1` did **not** reduce Qdrant's segment count (2 segments in every run), so the effect of segment count is not isolated; those rows are near-duplicates of the default builds.
+- Caveats: synthetic faces, one build per setting, single queries over local HTTP in a Colima VM.
 
 ### Multimodal LLM and general-purpose encoder on pairs · [`experiments/mllm_pairs`](experiments/mllm_pairs/)
 LLaVA-1.5-7B (4-bit, MLX) asked "same person?" on 600 sampled pairs (300 same / 300 different), scored by the Yes-vs-No probability, compared with the embedding models on the **same pairs**.
@@ -142,8 +162,8 @@ Small sample (600 pairs; "found @1% false-accept" rests on ~3 impostors) and ran
 ## Pipeline and reports
 - [`pipeline/facematch.py`](pipeline/facematch.py): enroll / search / verify using SCRFD + glintr100 (InsightFace `FaceAnalysis`) and Qdrant. [`pipeline/dedupe.py`](pipeline/dedupe.py): top-5 cross-ID duplicate search (the full run on the real data was **not completed**).
 - [`docs/how-it-works.html`](docs/how-it-works.html): visual explainer (detection, alignment, embeddings, cosine, Qdrant, exact vs HNSW, interactive HNSW demo). Download and open in a browser.
-- [`reports/`](reports/): `FaceMatch_Analysis.xlsx` (photo-wise top-5 detail, thresholds, failure analysis, HNSW / latency tables) and `FaceMatch_Dashboard.html` (charts) for the **baseline model** with their generator scripts. They predate the 21-model comparison above
-  and the Excel file contains VGGFace2 thumbnails (private repo only).
+- [`reports/`](reports/): `FaceMatch_Analysis.xlsx` and `FaceMatch_Dashboard.html` with their generator scripts. They now include the 21-model comparison (Excel sheets *Model Benchmark*, *Pair Test*, *Synthetic 100k*; a dashboard section), while the remaining sheets/charts (photo-wise top-5 detail, thresholds, failure analysis, HNSW / latency) analyse the **baseline model**.
+  The Excel file contains VGGFace2 thumbnails (private repo only). The generators read the local run folders, so they are records of how the files were made, not portable scripts.
 
 ## Reproduce
 ```bash
@@ -166,11 +186,11 @@ Notes: ONNX models use CoreML (Apple Silicon) or CUDA if present, otherwise CPU;
 
 ## Roadmap
 1. Run the best models on the real ID-photo-vs-selfie data and tune thresholds there.
-2. Heavier HNSW settings (`m`, `ef_construct`, `hnsw_ef`) at 100k+; multi-seed repeats of the top models.
+2. HNSW at 1M+ vectors (where the speed advantage should appear); multi-seed repeats of the top models.
 3. WebFace42M / TransFace / TopoFR models if weights can be obtained; commercial-licence options.
 
 ## Verification
-`python -m benchmark.run <slug> --out /tmp/verify` was run through the refactored code for four models and compared with the original run:
+`python -m benchmark.run <slug> --out /tmp/verify` was run through the refactored code for four models and compared with the original run: 
 
 | Model | Top-1 (original / refactored) | Found @1% | EER | All six key metrics |
 |---|--:|--:|--:|---|
@@ -179,6 +199,8 @@ Notes: ONNX models use CoreML (Apple Silicon) or CUDA if present, otherwise CPU;
 | `sface-opencv` | 77.24% / 77.24% | 55.9% / 55.9% | 5.13% / 5.13% | identical |
 | `edgeface-xxs` | 77.86% / 77.86% | 51.2% / 51.2% | 5.41% / 5.41% | identical |
 
+
+The two long-running experiment scripts were adapted to repo-relative paths after their reported runs and then **smoke-tested in their repo form**: `synth_100k.py` on a 3,000-identity slice (2,500 enrolled: 93.0% top-1; Qdrant exact search identical to the numpy search on all probes) and `mllm_pairs.py` on the first 12 pairs (same pairs, scores identical to the original run). The full 100-minute / 40-minute runs were not repeated.
 
 ## Licence of this repository
 No licence file has been added yet (private, internal). The models, datasets and weights referenced here keep their own licences (see each model folder); none of them are redistributed in this repo.
@@ -189,7 +211,7 @@ benchmark/          shared protocol, evaluation, loaders, CLI (run.py, aggregate
 data/split_8k.csv   the 8k split (relative paths)
 models/<slug>/      README.md, model.py, results.json  (one per model)
 results/            all_models.csv/json, figures/, experiment summaries
-experiments/        hnsw_vs_exact, synthetic_100k, mllm_pairs, latency_scaling
+experiments/        hnsw_vs_exact, hnsw_tuning, synthetic_100k, mllm_pairs, latency_scaling
 pipeline/           enroll/search/verify + duplicate search scripts
 docs/               how-it-works.html
 reports/            Excel report, dashboard and their generators (baseline model)

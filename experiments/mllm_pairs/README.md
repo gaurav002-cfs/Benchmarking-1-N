@@ -8,7 +8,7 @@ The two faces are shown side by side in one 448x448 image. Prompt: "Do they show
 The embedding models are scored on the **same pairs** with cosine similarity. Model: `mlx-community/llava-1.5-7b-4bit` (MLX, Apple Silicon).
 
 **Files**
-- [`mllm_pairs.py`](mllm_pairs.py): runs the LLaVA scoring (about 2.5-4 s per pair). Paths adapted for the repo after the reported run.
+- [`mllm_pairs.py`](mllm_pairs.py): runs the LLaVA scoring (about 2.5-4 s per pair). Paths adapted for the repo after the reported run, then re-checked in this form: the first 12 pairs (`MAX_PAIRS=12`) reproduced the original scores exactly.
 - [`mllm_eval.py`](mllm_eval.py): compares with all cached embedding models. `python -m experiments.mllm_pairs.mllm_eval experiments/mllm_pairs/llava15_pairs.jsonl`
 - [`llava15_pairs.jsonl`](llava15_pairs.jsonl): per-pair image names, label and LLaVA score. [`llava15_pairs_vs_specialists.csv`](llava15_pairs_vs_specialists.csv): the comparison (also in `results/mllm_pair_test.csv`).
 

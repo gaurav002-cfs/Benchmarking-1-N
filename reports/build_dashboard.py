@@ -1,4 +1,5 @@
 """Build FaceMatch_Dashboard.html: exact vs HNSW(ef) charts, Top-1..Top-10, match-% distributions. Self-contained (inline plotly)."""
+from pathlib import Path
 import glob, json, time
 
 import numpy as np
@@ -125,12 +126,52 @@ f.add_scatter(x=[8000, 25000, 100000], y=[3.3, 3.4, 3.6], name="HNSW ef=128", mo
 layout(f, 380, "Search latency vs collection size (measured p50; 25k/100k padded with random vectors)"); f.update_xaxes(title="vectors in collection", type="log"); f.update_yaxes(title="ms", range=[0, 11])
 figs["lat"] = f
 
+# ---------- 21-model benchmark + heavier HNSW (from the repo results) ----------
+import pandas as _pd
+REPO = Path(__file__).resolve().parent / "publish/Benchmarking-1-N"
+allm = json.load(open(REPO / "results/all_models.json")); meta = json.load(open(REPO / "results/model_meta.json"))
+LCOL = {"noncommercial": "#d9534f", "permissive": "#2e9e5b", "unknown": "#e0a030", "leaked": "#888888"}
+LLAB = {"noncommercial": "non-commercial", "permissive": "permissive (Apache/MIT)", "unknown": "licence not stated / unverified", "leaked": "leaked (trained on this data)"}
+def tier_of(sl):
+    if meta[sl]["license_class"] == "leaked": return "Not comparable"
+    t = allm[sl]["top1"] * 100
+    return "Tier 1" if t >= 92.5 else "Tier 2" if t >= 90 else "Tier 3" if t >= 80 else "Tier 4"
+ord_m = sorted(allm, key=lambda sl: -allm[sl]["top1"])
+f = go.Figure()
+for cls in LCOL:
+    sel = [sl for sl in ord_m if meta[sl]["license_class"] == cls]
+    if not sel: continue
+    f.add_bar(y=[meta[sl]["name"] for sl in sel], x=[allm[sl]["top1"] * 100 for sl in sel], orientation="h", name=LLAB[cls], marker_color=LCOL[cls],
+              text=[f"{allm[sl]['top1'] * 100:.1f}%" for sl in sel], textposition="outside")
+layout(f, 760, "Top-1 accuracy of 21 models (VGGFace2 8k), coloured by licence class"); f.update_yaxes(autorange="reversed"); f.update_xaxes(range=[0, 100], title="% of probes with the right person first")
+figs["models"] = f
+f = go.Figure()
+for cls in LCOL:
+    sel = [sl for sl in ord_m if meta[sl]["license_class"] == cls]
+    if sel: f.add_scatter(x=[allm[sl]["top1"] * 100 for sl in sel], y=[allm[sl]["found@unknown_accept_1%"] * 100 for sl in sel], mode="markers+text", text=[meta[sl]["name"].split(" (")[0] for sl in sel],
+                          textposition="top center", textfont_size=9, marker=dict(size=11, color=LCOL[cls]), name=LLAB[cls])
+layout(f, 520, "Closed-set (top-1) vs open-set (found @1% unknown-accept)"); f.update_xaxes(title="top-1 (%)"); f.update_yaxes(title="found @1% unknown-accept (%)")
+figs["scatter"] = f
+models_table = "<table style='border-collapse:collapse;font-size:13px;width:100%'><tr style='background:#1F3864;color:#fff'>" + "".join(f"<th style='padding:6px;text-align:left'>{h}</th>" for h in ["#", "Model", "Tier", "Top-1", "Top-5", "Top-10", "Found@1%", "TAR@0.1%", "EER", "Licence class"]) + "</tr>"
+for i, sl in enumerate(ord_m, 1):
+    r = allm[sl]; models_table += (f"<tr style='border-bottom:1px solid #ddd'><td style='padding:5px'>{i}</td><td>{meta[sl]['name']}</td><td>{tier_of(sl)}</td><td>{r['top1'] * 100:.2f}%</td><td>{r['top5'] * 100:.2f}%</td><td>{r['top10'] * 100:.2f}%</td>"
+                                   f"<td>{r['found@unknown_accept_1%'] * 100:.1f}%</td><td>{r['TAR@FAR=0.001'] * 100:.1f}%</td><td>{r['EER'] * 100:.2f}%</td><td>{LLAB[meta[sl]['license_class']]}</td></tr>")
+models_table += "</table>"
+tun = REPO / "experiments/hnsw_tuning/hnsw_tuning.csv"; tun_html = ""
+if tun.exists():
+    t = _pd.read_csv(tun); f = go.Figure()
+    for cfg, g in t.groupby("config", sort=False): f.add_scatter(x=g["hnsw_ef"], y=g["same_top1_as_exact"] * 100, mode="lines+markers", name=cfg)
+    layout(f, 460, "99,499-person synthetic gallery: HNSW agreement with exact search, by build settings"); f.update_xaxes(type="log", title="hnsw_ef (query time)"); f.update_yaxes(title="same top-1 as exact (%)")
+    figs["tuning"] = f
+
 # ---------- html ----------
 first = [True]
 def div(fig):
     h = fig.to_html(full_html=False, include_plotlyjs="inline" if first[0] else False); first[0] = False; return h
 
 
+tun_html = ("<h3>Heavier HNSW build settings at 100k (synthetic)</h3><div class=box>" + div(figs["tuning"]) +
+            "<p>Each line is one build configuration (m / ef_construct / segments). See the repo's experiments/hnsw_tuning.</p></div>") if "tuning" in figs else ""
 r_, tp = ex["right"], ex["sc"][:, 0]
 cards = [("Top-1", f"{ex['topk'][0] * 100:.1f}%", "right person ranked first"), ("Top-5", f"{ex['topk'][4] * 100:.1f}%", "in first 5"), ("Top-10", f"{ex['topk'][9] * 100:.1f}%", "in first 10"),
          ("Found @40%", f"{(r_ & (tp >= TH)).mean() * 100:.1f}%", "correct + accepted"),
@@ -163,6 +204,10 @@ Results below are on VGGFace2 (clean, pre-aligned) - the easy case; real Cashfre
 <h2>4. Latency and scale</h2>
 <div class=box>{div(figs['lat'])}<ul><li>Exact scan grows linearly (~0.066 ms per 1,000 vectors); HNSW stays almost flat.</li>
 <li>At 8k-100k vectors search is under 10 ms - embedding (~100 ms) dominates, so HNSW isn't needed for speed yet. 1M-vector behaviour was not measured.</li></ul></div>
+<h2>5. Model benchmark: 21 open-weight models</h2>
+<div class=note>Same split and metrics for every model (8,000 enrolled people, 24,000 probes, 1,500 unknown-person photos, exact search). <b>Found@1%</b> = share of enrolled people identified when only 1% of strangers' photos are accepted;
+<b>TAR@0.1%</b> = 1:1 same-person pairs accepted when 0.1% of different-person pairs are wrongly accepted; <b>EER</b> lower is better. Licence classes are a reading of the model cards, not legal advice.</div>
+<div class=box>{div(figs['models'])}</div><div class=box>{div(figs['scatter'])}</div><div class=box>{models_table}</div>{tun_html}
 <h2>Caveats</h2><ul><li>Single random 8k gallery/seed; VGGFace2 is cleaner than real KYC photos; misses likely hard/mislabeled photos (not verified by eye).</li>
 <li>Latency values were measured earlier in this session (3,000-probe test), not in this run. Face detection (SCRFD) not timed - VGGFace2 is pre-aligned.</li>
 <li>HNSW recall at sizes above 8k was not measured. Weights and VGGFace2 are non-commercial research licensed.</li></ul>

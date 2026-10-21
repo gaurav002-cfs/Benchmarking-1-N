@@ -1,0 +1,11 @@
+Copyright (c) 2026. All rights reserved.
+
+INTERNAL USE ONLY. This repository is private. No licence to use, copy, modify or distribute
+the code, results or documents in this repository is granted outside the owning organisation.
+
+Third-party models, weights and datasets referenced here (InsightFace, EdgeFace, LVFace, CVLface,
+AuraFace, SFace, FaceNet, CLIP, VGGFace2, Glint360K, WebFace, ...) are NOT included and remain under
+their own licences; see each models/<slug>/README.md. Several are non-commercial / research-only.
+
+(This is a placeholder notice, not a legal grant. Replace it with the licence the owners choose,
+e.g. MIT or Apache-2.0, before any sharing outside the organisation.)

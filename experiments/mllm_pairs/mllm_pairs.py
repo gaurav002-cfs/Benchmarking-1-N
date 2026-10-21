@@ -1,4 +1,4 @@
-# NOTE: paths adapted for the repo after the reported run (which used local absolute paths).
+# NOTE: paths adapted for the repo after the reported run (local absolute paths). Re-checked in this form: MAX_PAIRS=12 reproduced the original scores exactly.
 """1:1 'same person?' test for a multimodal LLM (mlx-vlm) on sampled VGGFace2-8k pairs.
 Each pair = probe + (its own enrolled image | a random other enrolled image), shown side by side in ONE image.
 Score = logprob("Yes") - logprob("No") for the first answer token.
@@ -50,6 +50,7 @@ import time; t0 = time.time(); cnt = 0
 with open(out, "a") as fo:
     for k, (a, b, y) in enumerate(pairs):
         if k in done: continue
+        if cnt >= int(os.environ.get("MAX_PAIRS", 10**9)): break                  # smoke test: stop early
         # bypass mlx-vlm's wrapper (its padding kwarg breaks on new transformers): processor expands <image> to 576 tokens itself
         inp = proc(text=prompt, images=Image.open(composite(a, b, k)).convert("RGB"), return_tensors="np")
         ids_ = mx.array(inp["input_ids"]); emb = model.get_input_embeddings(ids_, mx.array(inp["pixel_values"])).inputs_embeds

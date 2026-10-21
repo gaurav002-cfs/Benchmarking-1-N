@@ -1,4 +1,4 @@
-# NOTE: adapted for portability (env vars for paths) AFTER the reported run, which used the original local paths. Not re-run in this form (about 100 min).
+# NOTE: adapted for portability (env vars for paths) AFTER the reported run, which used the original local paths. Smoke-tested in this form with SYNTH_LIMIT=3000; the full run (about 100 min) was not repeated.
 """Synthetic ~100k-identity test: enroll image 0 of each identity, probe with images 1-4, 500 held-out unknown identities.
 Embeddings via CoreML (resumable, chunked). Exact search via numpy; Qdrant exact vs HNSW checked on a probe sample."""
 import glob, json, os, time
@@ -14,7 +14,9 @@ WD = os.environ.get("SYNTH_WORK", "work_synth100k"); os.makedirs(WD, exist_ok=Tr
 SRC = os.path.expanduser(os.environ.get("SYNTH_ROOT", "~/Downloads")); BS, CH, N_UNK, SEED = 64, 16384, 500, 42   # folder holding subjects_*_5_imgs/
 roots = [r for r in sorted(glob.glob(f"{SRC}/subjects_*_5_imgs")) if os.path.isdir(r)]
 id2dir = {p: os.path.join(r, p) for r in roots for p in os.listdir(r) if p.isdigit()}
-ids = np.array(sorted(id2dir, key=int)); perm = np.random.default_rng(SEED).permutation(len(ids))
+ids = np.array(sorted(id2dir, key=int))
+if os.environ.get("SYNTH_LIMIT"): ids = ids[:int(os.environ["SYNTH_LIMIT"])]     # smoke test on a slice (full run: unset)
+perm = np.random.default_rng(SEED).permutation(len(ids))
 unk, enr = ids[perm[:N_UNK]], ids[perm[N_UNK:]]
 print(f"identities={len(ids)} enrolled={len(enr)} unknown={len(unk)}", flush=True)
 

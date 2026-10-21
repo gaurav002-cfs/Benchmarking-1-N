@@ -72,6 +72,8 @@ def title(ws, text, sub=None):
         ws["A2"] = sub; ws["A2"].font = Font(italic=True, color="595959")
 
 
+from pathlib import Path
+SRC_DIR = Path(__file__).resolve().parent
 wb = Workbook()
 
 # ---------- thresholds ----------
@@ -275,6 +277,80 @@ for k, j in enumerate(bad, 4):
     ws.cell(k, 6).number_format = PCT; ws.cell(k, 7).number_format = PCT
 ws.freeze_panes = "A4"; widths(ws, [14, 24, 22, 14, 14, 12, 14, 12])
 
+# ---------- 9b. Model benchmark (21 models), pair test, synthetic 100k ----------
+REPO = SRC_DIR / "publish/Benchmarking-1-N"
+allm = json.load(open(REPO / "results/all_models.json")); meta = json.load(open(REPO / "results/model_meta.json"))
+def tier_of(s):
+    if meta[s]["license_class"] == "leaked": return "Not comparable"
+    t = allm[s]["top1"] * 100
+    return "Tier 1" if t >= 92.5 else "Tier 2" if t >= 90 else "Tier 3" if t >= 80 else "Tier 4"
+order_m = sorted(allm, key=lambda s: -allm[s]["top1"])
+TFILL = {"Tier 1": GOOD, "Tier 2": PatternFill("solid", fgColor="E2F0D9"), "Tier 3": WARN, "Tier 4": BAD, "Not comparable": PatternFill("solid", fgColor="D9D9D9")}
+ws = wb.create_sheet("Model Benchmark", 1)
+title(ws, "Model benchmark: 21 open-weight models on the VGGFace2 8k 1:N protocol",
+      "8,000 enrolled people (1 photo each), 24,000 probes, 1,500 photos of 500 unknown people. Exact cosine search. Details: GitHub repo gaurav002-cfs/Benchmarking-1-N")
+cols_m = ["#", "Model", "Tier", "Top-1", "Top-5", "Top-10", "Found @1% unknown-accept", "Found @5% unknown-accept", "TAR @ FAR 0.1%", "TAR @ FAR 0.01%", "EER", "Embedding dim", "Params (M)", "Training data", "Licence (summary)", "Notes"]
+header(ws, 4, cols_m)
+for k, sl in enumerate(order_m, 5):
+    r = allm[sl]; mt = meta[sl]
+    vals = [k - 4, mt["name"], tier_of(sl), r["top1"], r["top5"], r["top10"], r["found@unknown_accept_1%"], r["found@unknown_accept_5%"], r["TAR@FAR=0.001"], r["TAR@FAR=0.0001"], r["EER"], r["dim"], mt["params"], mt["training_data"], mt["license"], mt["notes"]]
+    for j, v in enumerate(vals, 1):
+        c = ws.cell(k, j, v)
+        if 4 <= j <= 11: c.number_format = "0.00%"
+    ws.cell(k, 3).fill = TFILL[tier_of(sl)]
+n_m = len(order_m)
+base = 5 + n_m + 1
+ws.cell(base, 1, "How to read the columns").font = Font(bold=True, size=12)
+for i, t in enumerate(["Top-1 / Top-5 / Top-10: share of probe photos where the right person is the first / within the first 5 / within the first 10 results.",
+                       "Found @X% unknown-accept: threshold set so only X% of never-enrolled people's photos are accepted; share of enrolled probes still correctly identified above it (higher = better, penalises accepting strangers).",
+                       "TAR @ FAR: 1:1 verification. FAR = how often two DIFFERENT people are wrongly accepted (fixed at 0.1% / 0.01%); TAR = share of SAME-person pairs accepted at that strictness (higher = better).",
+                       "EER: equal error rate, where false accepts equal false rejects (LOWER = better).",
+                       "Tier (by top-1): 1 = >=92.5%, 2 = 90-92.5%, 3 = 80-90%, 4 = <80%. 'Not comparable' = the FaceNet model trained on VGGFace2 (leaked).",
+                       "Similarity scores are model-specific: a threshold chosen for one model does not transfer to another model or dataset.",
+                       "Licence column is a reading of the model cards, not legal advice. LVFace / CVLface weights licences are unverified; non-commercial models need a commercial licence for production."], base + 1):
+    ws.cell(i, 1, t)
+bc = BarChart(); bc.type = "bar"; bc.title = "Top-1 and Top-10 by model"; bc.height, bc.width = 14, 26
+bc.add_data(Reference(ws, min_col=4, min_row=4, max_row=4 + n_m), titles_from_data=True); bc.add_data(Reference(ws, min_col=6, min_row=4, max_row=4 + n_m), titles_from_data=True)
+bc.set_categories(Reference(ws, min_col=2, min_row=5, max_row=4 + n_m)); bc.y_axis.scaling.min = 0; bc.y_axis.scaling.max = 1; bc.x_axis.scaling.orientation = "maxMin"
+ws.add_chart(bc, f"B{base + 10}")
+widths(ws, [5, 44, 14, 9, 9, 9, 14, 14, 12, 12, 9, 10, 10, 40, 48, 70]); ws.freeze_panes = "C5"; ws.row_dimensions[4].height = 45
+
+pair = pd.read_csv(REPO / "results/mllm_pair_test.csv")
+ws = wb.create_sheet("Pair Test", 2)
+title(ws, "1:1 same-person pair test: LLaVA-1.5-7B vs embedding models", "600 sampled pairs (300 same / 300 different); small sample, random (easy) impostors; LLaVA answered 'Yes' on every pair so only its score carries signal.")
+header(ws, 4, ["Model", "AUC", "Best-threshold accuracy", "Found @10% false-accept", "Found @1% false-accept (about 3 impostors: noisy)"])
+for k, rw in enumerate(pair.itertuples(index=False), 5):
+    for j, v in enumerate(rw, 1):
+        c = ws.cell(k, j, v)
+        if j == 2: c.number_format = "0.000"
+        elif j > 2: c.number_format = "0.0%"
+    if "MLLM" in str(rw[0]): [setattr(ws.cell(k, j), "fill", BAD) for j in range(1, 6)]
+widths(ws, [44, 10, 20, 22, 36])
+
+sc = pd.read_csv(REPO / "experiments/synthetic_100k/scale_curve.csv"); syn = json.load(open(REPO / "results/synthetic_100k_summary.json"))
+ws = wb.create_sheet("Synthetic 100k", 3)
+title(ws, "Synthetic faces: accuracy vs gallery size (baseline glintr100), and HNSW at 99,499 people", "Synthetic data; exact search; 10,000 random probes per row. Full run: 397,996 probes, 500 unknown identities.")
+header(ws, 4, list(sc.columns))
+for k, rw in enumerate(sc.itertuples(index=False), 5):
+    for j, v in enumerate(rw, 1):
+        c = ws.cell(k, j, v)
+        if j in (2, 3, 4, 7, 8, 9): c.number_format = "0.0%"
+ws.cell(12, 1, f"Full run at {syn['gallery']:,} people: top-1 {syn['top1']:.1%}, top-5 {syn['top5']:.1%}, top-10 {syn['top10']:.1%}.").font = Font(bold=True)
+header(ws, 14, ["Qdrant search (m=16, ef_construct=100; 10,000-probe sample)", "Top-1", "Same top-1 as exact", "p50 latency (ms)"])
+for k, (nm, v) in enumerate(syn["qdrant_sample10k"].items(), 15):
+    for j, x in enumerate([nm, v["top1"], v["same_as_numpy_exact"], v["p50_ms"]], 1):
+        c = ws.cell(k, j, x)
+        if j in (2, 3): c.number_format = "0.0%"
+        elif j == 4: c.number_format = "0.0"
+hn = REPO / "experiments/hnsw_tuning/hnsw_tuning.csv"
+if hn.exists():
+    t = pd.read_csv(hn); r0 = 22; ws.cell(r0 - 1, 1, "Heavier HNSW settings (see experiments/hnsw_tuning)").font = Font(bold=True, size=12); header(ws, r0, list(t.columns))
+    for k, rw in enumerate(t.itertuples(index=False), r0 + 1):
+        for j, v in enumerate(rw, 1): ws.cell(k, j, None if pd.isna(v) else v)
+widths(ws, [52, 14, 22, 16, 22, 26, 24, 12, 12, 12, 12])
+wb["Summary"]["A3"] = "21-model comparison: see sheets 'Model Benchmark', 'Pair Test' and 'Synthetic 100k'. The remaining sheets analyse the baseline model (glintr100) photo by photo."
+wb["Summary"]["A3"].font = Font(italic=True, color="C00000")
+
 # ---------- 10. Method ----------
 ws = wb.create_sheet("Method & Caveats")
 title(ws, "Method and caveats")
@@ -287,7 +363,9 @@ lines = ["PIPELINE: image -> (VGGFace2 images are pre-aligned 112x112, detection
          "LIMITS: VGGFace2 is cleaner than real KYC photos; single random gallery/seed; failure causes (pose/blur/mislabel) not verified by eye.",
          "HNSW recall tested only at 8,000 vectors on 3,000 probes. 25k/100k latency used random padding vectors; 1M is extrapolated.",
          "LICENCE: antelopev2 weights and VGGFace2 are for non-commercial research use - confirm before production use.",
-         "ENVIRONMENT: 10-core Apple Silicon Mac, ONNX Runtime CPU, Qdrant in Colima; latency includes local HTTP round trip."]
+         "ENVIRONMENT: 10-core Apple Silicon Mac, ONNX Runtime CPU, Qdrant in Colima; latency includes local HTTP round trip.",
+         "MODEL BENCHMARK: 21 models, same split and metrics; one random split (Tier 1 order not statistically reliable); possible training-data overlap with VGGFace2; FaceNet-VGGFace2 is leaked.",
+         "Full code, per-model pages and caveats: GitHub repo gaurav002-cfs/Benchmarking-1-N."]
 for k, t in enumerate(lines, 3):
     ws.cell(k, 1, t).alignment = wrap
 widths(ws, [150])
