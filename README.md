@@ -203,7 +203,7 @@ Notes: ONNX models use CoreML (Apple Silicon) or CUDA if present, otherwise CPU;
 The two long-running experiment scripts were adapted to repo-relative paths after their reported runs and then **smoke-tested in their repo form**: `synth_100k.py` on a 3,000-identity slice (2,500 enrolled: 93.0% top-1; Qdrant exact search identical to the numpy search on all probes) and `mllm_pairs.py` on the first 12 pairs (same pairs, scores identical to the original run). The full 100-minute / 40-minute runs were not repeated.
 
 ## Licence of this repository
-No licence file has been added yet (private, internal). The models, datasets and weights referenced here keep their own licences (see each model folder); none of them are redistributed in this repo.
+The code, documents and results in this repository are released under the [MIT License](LICENSE). This does **not** cover third-party models, weights or datasets: they are not redistributed here and keep their own licences (see each model folder; several are non-commercial / research-only). `reports/FaceMatch_Analysis.xlsx` also contains thumbnails from the VGGFace2 dataset, which are not covered by the MIT licence: remove that file before any public release.
 
 ## Repository layout
 ```

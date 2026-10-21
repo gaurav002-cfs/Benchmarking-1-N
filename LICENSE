@@ -1,11 +1,21 @@
-Copyright (c) 2026. All rights reserved.
+MIT License
 
-INTERNAL USE ONLY. This repository is private. No licence to use, copy, modify or distribute
-the code, results or documents in this repository is granted outside the owning organisation.
+Copyright (c) 2026 gaurav002-cfs
 
-Third-party models, weights and datasets referenced here (InsightFace, EdgeFace, LVFace, CVLface,
-AuraFace, SFace, FaceNet, CLIP, VGGFace2, Glint360K, WebFace, ...) are NOT included and remain under
-their own licences; see each models/<slug>/README.md. Several are non-commercial / research-only.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-(This is a placeholder notice, not a legal grant. Replace it with the licence the owners choose,
-e.g. MIT or Apache-2.0, before any sharing outside the organisation.)
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
