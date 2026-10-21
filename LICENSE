@@ -1,21 +1,32 @@
-MIT License
+EDUCATIONAL USE LICENSE
 
 Copyright (c) 2026 gaurav002-cfs
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is granted, free of charge, to any person to use, copy, modify and share the code, documents,
+results and figures in this repository (the "Materials") for EDUCATIONAL PURPOSES ONLY, meaning learning,
+teaching, coursework, personal study, and non-commercial academic or research work, subject to the
+following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. No commercial use. The Materials, in whole or in part, may not be used in or for any product, service
+   or activity that is sold, licensed, or otherwise intended to produce revenue or commercial advantage,
+   nor for the business operations of a company or other commercial organisation.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Attribution. Keep this notice with any copy or derived work, and credit this repository when you
+   share or publish results that build on the Materials.
+
+3. Third-party materials are not covered. Models, weights, datasets and code that the Materials refer to
+   or download (for example InsightFace, EdgeFace, LVFace, CVLface, LAFS, MagFace, ElasticFace, ViT-8R,
+   AuraFace, SFace, FaceNet, CLIP, VGGFace2, Glint360K, WebFace) are not part of the Materials, are not
+   licensed here, and remain under their own licences, several of which are research-only or
+   non-commercial. You are responsible for complying with them. The Excel report in reports/ contains
+   thumbnails from the VGGFace2 dataset, which are likewise not covered by this licence.
+
+4. No warranty. THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+   OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THE MATERIALS OR THEIR USE.
+
+5. Rights reserved. All rights not expressly granted are reserved by the copyright holder. Any use outside
+   the educational purposes above, including commercial use, requires separate written permission.
+
+This is a custom licence. It is not an OSI-approved open-source licence.
